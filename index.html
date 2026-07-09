@@ -1,0 +1,1159 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>PMO Dashboard</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#F0F4F8;color:#1E293B;font-size:14px}
+:root{--indigo:#6366F1;--indigo-d:#4F46E5;--sidebar:#1E293B}
+.app{display:flex;min-height:100vh}
+.sidebar{width:230px;background:var(--sidebar);display:flex;flex-direction:column;flex-shrink:0;position:fixed;top:0;left:0;height:100vh;z-index:100}
+.main{margin-left:230px;flex:1;display:flex;flex-direction:column;min-height:100vh}
+.topbar{background:#fff;border-bottom:1px solid #E2E8F0;padding:14px 28px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:50}
+.content{padding:24px 28px;flex:1}
+.logo{padding:22px 18px 14px;border-bottom:1px solid #334155}
+.logo-box{display:flex;align-items:center;gap:10px}
+.logo-icon{width:34px;height:34px;border-radius:8px;background:var(--indigo);display:flex;align-items:center;justify-content:center;font-size:17px}
+.logo-title{color:#F1F5F9;font-size:13px;font-weight:600}
+.logo-sub{color:#64748B;font-size:11px}
+.nav{padding:12px 10px;flex:1}
+.nav-btn{width:100%;display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;border:none;background:transparent;color:#94A3B8;cursor:pointer;font-size:13px;font-weight:400;text-align:left;margin-bottom:2px;transition:all .15s;position:relative}
+.nav-btn:hover{background:#334155;color:#CBD5E1}
+.nav-btn.active{background:var(--indigo);color:#fff}
+.nav-icon{font-size:16px}
+.nav-badge{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:#EF4444;color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:99px;min-width:18px;text-align:center}
+.sidebar-footer{padding:14px 18px;border-top:1px solid #334155;display:flex;align-items:center;gap:10px}
+.avatar{width:32px;height:32px;border-radius:50%;background:#334155;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.user-name{color:#F1F5F9;font-size:12px;font-weight:500}
+.user-role{color:#64748B;font-size:11px}
+.page-title{font-size:17px;font-weight:600;color:#0F172A}
+.page-date{font-size:11px;color:#94A3B8;margin-top:2px}
+.btn-primary{background:var(--indigo);color:#fff;border:none;border-radius:8px;padding:9px 18px;cursor:pointer;font-size:13px;font-weight:500;display:inline-flex;align-items:center;gap:6px;transition:background .15s}
+.btn-primary:hover{background:var(--indigo-d)}
+.btn-outline{background:#fff;color:#64748B;border:1px solid #E2E8F0;border-radius:8px;padding:8px 16px;cursor:pointer;font-size:13px;font-weight:500;transition:all .15s}
+.btn-outline:hover{border-color:#6366F1;color:#6366F1}
+.btn-ghost{background:none;border:1px solid #E2E8F0;border-radius:8px;padding:8px 16px;cursor:pointer;font-size:13px;color:#64748B;transition:all .15s}
+.btn-ghost:hover{background:#F8FAFC}
+.btn-sm{padding:6px 12px;font-size:12px}
+.view{display:none}.view.active{display:block}
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-bottom:20px}
+.stat-card{background:#fff;border:1px solid #E2E8F0;border-radius:12px;padding:16px 18px}
+.stat-label{font-size:11px;color:#94A3B8;font-weight:500;margin-bottom:6px;text-transform:uppercase;letter-spacing:.3px}
+.stat-value{font-size:24px;font-weight:700;color:#0F172A;line-height:1}
+.stat-sub{font-size:11px;color:#94A3B8;margin-top:5px}
+.stat-icon{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;float:right;margin-top:-4px}
+.badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:500;white-space:nowrap}
+.badge-dot{width:6px;height:6px;border-radius:50%}
+.badge-planning{background:#EEF2FF;color:#3730A3}.badge-planning .badge-dot{background:#6366F1}
+.badge-ontrack{background:#ECFDF5;color:#065F46}.badge-ontrack .badge-dot{background:#10B981}
+.badge-atrisk{background:#FFFBEB;color:#92400E}.badge-atrisk .badge-dot{background:#F59E0B}
+.badge-delayed{background:#FEF2F2;color:#991B1B}.badge-delayed .badge-dot{background:#EF4444}
+.badge-completed{background:#F0FDF4;color:#14532D}.badge-completed .badge-dot{background:#22C55E}
+.badge-onhold{background:#F9FAFB;color:#374151}.badge-onhold .badge-dot{background:#9CA3AF}
+.pri-critical{background:#FEF2F2;color:#DC2626;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:500}
+.pri-high{background:#FFF7ED;color:#C2410C;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:500}
+.pri-medium{background:#EFF6FF;color:#1D4ED8;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:500}
+.pri-low{background:#F0FDF4;color:#15803D;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:500}
+.alert-critical{display:inline-flex;align-items:center;gap:5px;background:#FFF1F0;color:#C0392B;border:1px solid #F5C6C6;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;white-space:nowrap;animation:pulse-red 1.8s infinite}
+.alert-warning{display:inline-flex;align-items:center;gap:5px;background:#FFFBEB;color:#92400E;border:1px solid #FDE68A;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;white-space:nowrap}
+.alert-soon{display:inline-flex;align-items:center;gap:5px;background:#FFF7ED;color:#C2410C;border:1px solid #FED7AA;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;white-space:nowrap}
+.alert-early{display:inline-flex;align-items:center;gap:5px;background:#F0FDF4;color:#14532D;border:1px solid #BBF7D0;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;white-space:nowrap}
+.alert-overdue2{display:inline-flex;align-items:center;gap:5px;background:#FEF2F2;color:#991B1B;border:1px solid #FECACA;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;white-space:nowrap}
+@keyframes pulse-red{0%,100%{opacity:1}50%{opacity:.6}}
+.alert-banner{border-radius:10px;padding:12px 18px;margin-bottom:14px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.alert-banner-overdue{background:#FEF2F2;border:1px solid #FECACA}
+.alert-banner-warn{background:#FFFBEB;border:1px solid #FDE68A}
+.alert-banner-early{background:#F0FDF4;border:1px solid #BBF7D0}
+.progress-wrap{background:#F1F5F9;border-radius:99px;height:8px;overflow:hidden;flex:1}
+.progress-bar{height:100%;border-radius:99px;transition:width .4s}
+.table-card{background:#fff;border:1px solid #E2E8F0;border-radius:12px;overflow:hidden;margin-bottom:18px}
+.table-header{padding:16px 20px;border-bottom:1px solid #F1F5F9;display:flex;justify-content:space-between;align-items:center}
+.table-title{font-size:15px;font-weight:600;color:#0F172A}
+.table-link{font-size:12px;color:#6366F1;background:none;border:none;cursor:pointer;font-weight:500}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;padding:10px 16px;font-size:11px;color:#94A3B8;font-weight:600;text-transform:uppercase;letter-spacing:.4px;background:#F8FAFC;white-space:nowrap}
+td{padding:11px 16px;border-top:1px solid #F8FAFC;vertical-align:middle}
+tr:hover td{background:#FAFAFA}
+.table-overflow{overflow-x:auto}
+.project-card{background:#fff;border:1px solid #E2E8F0;border-radius:12px;padding:18px 22px;cursor:pointer;margin-bottom:12px;transition:border-color .15s,box-shadow .15s}
+.project-card:hover{border-color:#A5B4FC;box-shadow:0 2px 12px rgba(99,102,241,.1)}
+.project-card.card-overdue{border-left:4px solid #EF4444}
+.project-card.card-critical{border-left:4px solid #EF4444;animation:pulse-border 2s infinite}
+.project-card.card-warning{border-left:4px solid #F59E0B}
+.project-card.card-soon{border-left:4px solid #F97316}
+.project-card.card-early{border-left:4px solid #22C55E}
+@keyframes pulse-border{0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,.2)}50%{box-shadow:0 0 0 4px rgba(239,68,68,.1)}}
+.filter-bar{background:#fff;border:1px solid #E2E8F0;border-radius:12px;padding:14px 18px;margin-bottom:18px;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.filter-bar input,.filter-bar select{padding:8px 12px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;font-family:inherit;color:#374151;background:#fff;outline:none;transition:border-color .15s}
+.filter-bar input:focus,.filter-bar select:focus{border-color:#6366F1}
+.filter-bar input{flex:1;min-width:180px}
+.filter-count{font-size:12px;color:#94A3B8;margin-left:auto}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.form-group{display:flex;flex-direction:column;gap:5px}
+.form-group.full{grid-column:span 2}
+.form-group label{font-size:12px;font-weight:500;color:#374151}
+.form-group input,.form-group select,.form-group textarea{padding:9px 12px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;font-family:inherit;color:#374151;outline:none;transition:border-color .15s}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:#6366F1}
+.form-group textarea{resize:vertical}
+.form-actions{display:flex;gap:10px;margin-top:18px}
+.close-btn{background:none;border:none;font-size:20px;cursor:pointer;color:#94A3B8;line-height:1}
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px}
+.detail-card{background:#F8FAFC;border-radius:10px;padding:14px 16px}
+.detail-label{font-size:11px;color:#94A3B8;font-weight:500;margin-bottom:4px}
+.detail-value{font-size:14px;font-weight:600;color:#0F172A}
+.update-log{border-bottom:1px solid #F1F5F9;padding:12px 0;display:flex;gap:12px}
+.update-dot{width:8px;height:8px;border-radius:50%;background:#6366F1;margin-top:4px;flex-shrink:0}
+.update-body{flex:1;background:#F8FAFC;border-radius:8px;padding:10px 14px}
+.update-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.update-date{font-size:11px;color:#94A3B8}
+.back-btn{background:none;border:none;color:#6366F1;cursor:pointer;font-size:13px;font-weight:500;padding:0 0 14px;display:flex;align-items:center;gap:4px}
+.budget-row{display:flex;justify-content:space-between;align-items:center;font-size:11px;color:#94A3B8;margin-top:4px}
+.status-dist{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+.status-dist-item{border-radius:10px;padding:12px 16px;flex:1;min-width:90px;text-align:center}
+.status-dist-num{font-size:22px;font-weight:700;line-height:1;margin-bottom:4px}
+.status-dist-label{font-size:11px;font-weight:500}
+.report-tabs{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap}
+.report-tab{background:#fff;border:1px solid #E2E8F0;color:#64748B;border-radius:8px;padding:9px 18px;cursor:pointer;font-size:13px;font-weight:500;transition:all .15s}
+.report-tab:hover{border-color:#A5B4FC;color:#6366F1}
+.report-tab.active{background:#6366F1;color:#fff;border-color:#6366F1}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(15,23,42,.45);z-index:200;align-items:flex-start;justify-content:center;padding-top:40px;overflow-y:auto}
+.modal-overlay.show{display:flex}
+.modal{background:#fff;border-radius:14px;padding:28px;width:680px;max-width:96vw;position:relative;margin-bottom:40px}
+.section-title{font-size:15px;font-weight:600;color:#0F172A;margin-bottom:14px}
+.divider{border:none;border-top:1px solid #F1F5F9;margin:16px 0}
+.text-green{color:#10B981;font-weight:600}.text-red{color:#EF4444;font-weight:600}.text-amber{color:#F59E0B;font-weight:600}
+.chip{font-size:11px;color:#94A3B8;background:#F1F5F9;padding:2px 8px;border-radius:6px}
+.empty-state{text-align:center;padding:48px;color:#94A3B8;font-size:13px}
+.toast{position:fixed;bottom:24px;right:24px;background:#1E293B;color:#fff;padding:12px 20px;border-radius:10px;font-size:13px;z-index:999;opacity:0;transform:translateY(10px);transition:all .3s;pointer-events:none}
+.toast.show{opacity:1;transform:translateY(0)}
+.subtask-row{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;background:#F8FAFC;margin-bottom:6px;border:1px solid #F1F5F9}
+.subtask-num{width:22px;height:22px;border-radius:50%;background:#E2E8F0;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#64748B}
+.subtask-name{flex:1;font-size:13px;color:#374151;font-weight:500}
+.subtask-add-btn{background:none;border:1px dashed #CBD5E1;border-radius:8px;width:100%;padding:9px;color:#94A3B8;cursor:pointer;font-size:13px;transition:all .15s;text-align:center}
+.subtask-add-btn:hover{border-color:#6366F1;color:#6366F1;background:#EEF2FF}
+.subtask-status-sel{font-size:12px;padding:3px 8px;border:1px solid #E2E8F0;border-radius:6px;background:#fff;color:#374151;cursor:pointer}
+.subtask-del{background:none;border:none;color:#FDA4AF;cursor:pointer;font-size:14px;padding:2px 4px;border-radius:4px}
+.subtask-del:hover{background:#FEF2F2;color:#EF4444}
+.gantt-container{overflow-x:auto;font-family:'Segoe UI',sans-serif}
+.gantt-table{border-collapse:collapse;width:100%;min-width:900px;table-layout:fixed}
+.gantt-table th,.gantt-table td{border:1px solid #CBD5E1;text-align:center;font-size:12px;padding:0;overflow:hidden}
+.gantt-cell-done{background:#6DB33F !important}
+.gantt-cell-process{background:#E8A838 !important}
+.gantt-cell-none{background:#fff}
+.gantt-cell-pending{background:#D9534F !important}
+.gantt-cell-undetermined{background:#CBD5E1 !important}
+.gantt-legend-done{background:#6DB33F;color:#fff}
+.gantt-legend-process{background:#E8A838;color:#fff}
+.gantt-legend-pending{background:#D9534F;color:#fff}
+.gantt-star{color:#F59E0B;font-size:14px}
+.alert-view-card{background:#fff;border:1px solid #E2E8F0;border-radius:12px;overflow:hidden;margin-bottom:16px}
+.alert-view-header{padding:14px 20px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #F1F5F9}
+.alert-row{padding:12px 20px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #F8FAFC;flex-wrap:wrap}
+.alert-row:last-child{border:none}
+.alert-project-link{font-weight:600;color:#0F172A;font-size:13px;background:none;border:none;cursor:pointer;text-align:left;padding:0}
+.alert-project-link:hover{color:#6366F1;text-decoration:underline}
+@media(max-width:640px){.sidebar{width:64px}.logo-title,.logo-sub,.nav-btn span:last-child,.user-name,.user-role{display:none}.main{margin-left:64px}.form-grid{grid-template-columns:1fr}.form-group.full{grid-column:span 1}.detail-grid{grid-template-columns:1fr}}
+.login-screen{position:fixed;inset:0;background:#1E293B;display:flex;align-items:center;justify-content:center;z-index:1000;padding:16px}
+.login-card{background:#fff;border-radius:16px;padding:36px 32px;width:100%;max-width:360px;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.login-logo{display:flex;justify-content:center;margin-bottom:14px}
+.login-logo .logo-icon{background:var(--indigo);border-radius:10px;display:flex;align-items:center;justify-content:center}
+.login-card h1{text-align:center;font-size:19px;font-weight:700;color:#0F172A;margin:0 0 4px}
+.login-sub{text-align:center;font-size:12px;color:#94A3B8;margin:0 0 22px}
+.login-error{color:#EF4444;font-size:12px;min-height:16px;margin:4px 0 12px;text-align:center}
+.login-btn{width:100%;justify-content:center;padding:11px}
+.logout-btn{background:none;border:none;color:#64748B;cursor:pointer;font-size:11px;padding:0;margin-top:2px;text-decoration:underline}
+.viewer-badge{display:none;background:#FEF3C7;color:#92400E;padding:3px 10px;border-radius:99px;font-size:11px;font-weight:600;margin-left:10px;white-space:nowrap}
+.viewer-mode .viewer-badge{display:inline-block}
+.viewer-mode .edit-only{display:none!important}
+.multi-check-box{border:1px solid #E2E8F0;border-radius:8px;padding:9px 10px;max-height:110px;overflow-y:auto;display:flex;flex-wrap:wrap;gap:10px;align-content:flex-start}
+.multi-check-box label{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:#374151;cursor:pointer;white-space:nowrap}
+.multi-check-box .empty-hint{font-size:11px;color:#94A3B8}
+.master-col-title{font-size:13px;font-weight:600;color:#0F172A;margin-bottom:8px}
+.master-add-row{display:flex;gap:6px;margin-bottom:8px}
+.master-add-row input{flex:1;padding:7px 10px;border:1px solid #E2E8F0;border-radius:7px;font-size:12px;font-family:inherit}
+.master-add-row button{background:#EEF2FF;color:#4338CA;border:none;border-radius:7px;padding:0 14px;cursor:pointer;font-size:14px;font-weight:600}
+.master-item-row{display:flex;justify-content:space-between;align-items:center;background:#F8FAFC;padding:7px 10px;border-radius:6px;font-size:12px;margin-bottom:5px}
+.master-item-row button{background:none;border:none;color:#EF4444;cursor:pointer;font-size:13px}
+.master-list-box{max-height:170px;overflow-y:auto}
+</style>
+</head>
+<body>
+<script>if(new URLSearchParams(location.search).get('view')==='1'){document.write('<style>#loginScreen{display:none!important}#appRoot{display:block!important}</style>');}</script>
+<div id="loginScreen" class="login-screen">
+  <div class="login-card">
+    <div class="login-logo"><div class="logo-icon" style="width:44px;height:44px;font-size:22px">🗂</div></div>
+    <h1>PMO Dashboard</h1>
+    <p class="login-sub">Masuk untuk mengakses dashboard project</p>
+    <form id="loginForm">
+      <div class="form-group" style="margin-bottom:14px"><label>Email</label><input type="email" id="loginEmail" placeholder="nama@email.com" autocomplete="username"></div>
+      <div class="form-group" style="margin-bottom:6px"><label>Password</label><input type="password" id="loginPassword" placeholder="••••••••" autocomplete="current-password"></div>
+      <div class="login-error" id="loginError"></div>
+      <button type="submit" class="btn-primary login-btn" id="loginBtn">Masuk</button>
+    </form>
+  </div>
+</div>
+<div class="app" id="appRoot" style="display:none">
+<aside class="sidebar">
+  <div class="logo"><div class="logo-box"><div class="logo-icon">🗂</div><div><div class="logo-title">PMO Dashboard</div><div class="logo-sub">Project Monitoring</div></div></div></div>
+  <nav class="nav">
+    <button class="nav-btn active" onclick="showView('dashboard',this)"><span class="nav-icon">📊</span><span>Dashboard</span></button>
+    <button class="nav-btn" onclick="showView('projects',this)"><span class="nav-icon">📁</span><span>Projects</span></button>
+    <button class="nav-btn" id="navAlert" onclick="showView('alerts',this)"><span class="nav-icon">🔔</span><span>Alerts</span></button>
+    <button class="nav-btn" onclick="showView('report',this)"><span class="nav-icon">📋</span><span>Report</span></button>
+    <button class="nav-btn edit-only" onclick="openModal('masterDataModal')"><span class="nav-icon">⚙️</span><span>Data Master</span></button>
+  </nav>
+  <div class="sidebar-footer"><div class="avatar">👤</div><div style="min-width:0;flex:1"><div class="user-name" id="userEmailDisplay" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">PMO Manager</div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="logout-btn edit-only" style="color:#818CF8" onclick="copyShareLink()">🔗 Bagikan</button><button class="logout-btn edit-only" onclick="doLogout()">Keluar</button></div></div></div>
+</aside>
+<main class="main">
+  <div class="topbar">
+    <div style="display:flex;align-items:center;gap:0"><div><div class="page-title" id="pageTitle">Dashboard Overview</div><div class="page-date" id="pageDate"></div></div><span class="viewer-badge">👁️ Mode Viewer</span></div>
+    <div id="topbarActions"><button class="btn-primary edit-only" onclick="openModal('addProjectModal')">＋ Input Project</button></div>
+  </div>
+  <div class="content">
+    <div id="view-dashboard" class="view active">
+      <div id="dashAlertBanners"></div>
+      <div class="stat-grid" id="statGrid"></div>
+      <div class="stat-grid" id="statGrid2"></div>
+      <div class="table-card" style="margin-top:4px">
+        <div class="table-header"><span class="table-title">Project Overview</span><button class="table-link" onclick="navTo('projects')">Lihat Semua →</button></div>
+        <div class="table-overflow"><table><thead><tr><th>Project Name</th><th>PIC</th><th>Status</th><th>Timeline Alert</th><th>Progress</th><th>Budget</th></tr></thead><tbody id="dashTableBody"></tbody></table></div>
+      </div>
+      <div class="table-card" style="padding:20px"><div class="section-title">Status Distribution</div><div class="status-dist" id="statusDist"></div></div>
+    </div>
+    <div id="view-projects" class="view">
+      <div id="projectList">
+        <div class="filter-bar">
+          <input type="text" id="searchInput" placeholder="🔍  Cari project atau PIC..." oninput="renderProjects()">
+          <select id="filterStatus" onchange="renderProjects()"><option value="">Semua Status</option><option>Planning</option><option>On Track</option><option>At Risk</option><option>Delayed</option><option>Completed</option><option>On Hold</option></select>
+          <select id="filterPriority" onchange="renderProjects()"><option value="">Semua Prioritas</option><option>Critical</option><option>High</option><option>Medium</option><option>Low</option></select>
+          <select id="filterAlert" onchange="renderProjects()"><option value="">Semua Alert</option><option value="overdue">Overdue</option><option value="critical">Critical</option><option value="warning">Warning</option><option value="soon">Segera</option><option value="early">Selesai Awal</option></select>
+          <select id="filterSubdivisi" onchange="renderProjects()"><option value="">Semua Subdivisi</option></select>
+          <select id="filterUnitBisnis" onchange="renderProjects()"><option value="">Semua Unit Bisnis</option></select>
+          <span class="filter-count" id="filterCount"></span>
+          <button class="btn-outline btn-sm edit-only" style="color:#EF4444;border-color:#FECACA" onclick="deleteAllProjects()">🗑️ Hapus Semua</button>
+        </div>
+        <div id="projectCards"></div>
+      </div>
+      <div id="projectDetail" style="display:none"></div>
+    </div>
+    <div id="view-alerts" class="view"><div id="alertViewContent"></div></div>
+    <div id="view-report" class="view">
+      <div class="report-tabs">
+        <button class="report-tab active" onclick="showReport('summary',this)">📊 Executive Summary</button>
+        <button class="report-tab" onclick="showReport('detail',this)">📋 Project Detail</button>
+        <button class="report-tab" onclick="showReport('budget',this)">💰 Budget Report</button>
+        <button class="report-tab" onclick="showReport('timeline',this)">📅 Timeline Alert</button>
+        <button class="report-tab" onclick="showReport('gantt',this)">📊 Gantt RKF</button>
+      </div>
+      <div class="filter-bar" style="margin-bottom:16px">
+        <input type="text" id="rf_search" placeholder="🔍 Cari nama project / PIC..." oninput="renderReport(currentReport)">
+        <select id="rf_kategori" onchange="renderReport(currentReport)"><option value="">Semua Kategori</option></select>
+        <select id="rf_status" onchange="renderReport(currentReport)"><option value="">Semua Status</option><option>Planning</option><option>On Track</option><option>At Risk</option><option>Delayed</option><option>Completed</option><option>On Hold</option></select>
+        <select id="rf_priority" onchange="renderReport(currentReport)"><option value="">Semua Prioritas</option><option>Critical</option><option>High</option><option>Medium</option><option>Low</option></select>
+        <select id="rf_subdivisi" onchange="renderReport(currentReport)"><option value="">Semua Subdivisi</option></select>
+        <select id="rf_unitBisnis" onchange="renderReport(currentReport)"><option value="">Semua Unit Bisnis</option></select>
+        <select id="rf_picSubdivisi" onchange="renderReport(currentReport)"><option value="">Semua PIC Subdivisi</option></select>
+        <select id="rf_picUnitBisnis" onchange="renderReport(currentReport)"><option value="">Semua PIC Unit Bisnis</option></select>
+        <input type="date" id="rf_dateFrom" onchange="renderReport(currentReport)" title="Deadline dari tanggal" style="max-width:130px">
+        <input type="date" id="rf_dateTo" onchange="renderReport(currentReport)" title="Deadline sampai tanggal" style="max-width:130px">
+        <button class="btn-outline btn-sm" onclick="resetReportFilters()">↺ Reset Filter</button>
+        <span class="filter-count" id="reportFilterCount"></span>
+      </div>
+      <div id="reportContent"></div>
+    </div>
+  </div>
+</main>
+</div>
+
+<!-- ADD PROJECT MODAL -->
+<div class="modal-overlay" id="addProjectModal">
+  <div class="modal" style="width:720px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+      <div style="font-size:16px;font-weight:600;color:#0F172A">Input Project Baru</div>
+      <button class="close-btn" onclick="closeModal('addProjectModal')">✕</button>
+    </div>
+    <div class="form-grid">
+      <div class="form-group"><label>Nama Project *</label><input type="text" id="f_name" placeholder="Nama project"></div>
+      <div class="form-group"><label>PIC *</label><input type="text" id="f_pic" placeholder="Penanggung jawab"></div>
+      <div class="form-group"><label>Kategori Project</label><select id="f_cat"></select></div>
+      <div class="form-group"><label>Status</label><select id="f_status"><option>Planning</option><option>On Track</option><option>At Risk</option><option>Delayed</option><option>On Hold</option></select></div>
+      <div class="form-group"><label>Prioritas</label><select id="f_priority"><option>Critical</option><option>High</option><option selected>Medium</option><option>Low</option></select></div>
+      <div class="form-group"><label>Budget (Rp)</label><input type="number" id="f_budget" placeholder="0"></div>
+      <div class="form-group"><label>Tanggal Mulai *</label><input type="date" id="f_start"></div>
+      <div class="form-group"><label>Tanggal Selesai *</label><input type="date" id="f_end"></div>
+      <div class="form-group full"><label>Deskripsi</label><textarea id="f_desc" rows="2" placeholder="Deskripsi singkat..."></textarea></div>
+    </div>
+    <div style="margin-top:18px;border-top:1px solid #F1F5F9;padding-top:16px">
+      <div style="font-size:14px;font-weight:600;color:#0F172A;margin-bottom:10px">🏢 Subdivisi &amp; Unit Bisnis</div>
+      <div class="form-grid">
+        <div class="form-group"><label>Subdivisi TSI *</label><select id="f_subdivisi"></select></div>
+        <div class="form-group"><label>Unit Bisnis *</label><select id="f_unitBisnis"></select></div>
+        <div class="form-group full"><label>PIC Subdivisi <span style="color:#94A3B8;font-weight:400">(bisa lebih dari satu)</span></label><div class="multi-check-box" id="f_picSubdivisi_box"></div></div>
+        <div class="form-group full"><label>PIC Unit Bisnis <span style="color:#94A3B8;font-weight:400">(bisa lebih dari satu)</span></label><div class="multi-check-box" id="f_picUnitBisnis_box"></div></div>
+      </div>
+    </div>
+    <div style="margin-top:20px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <div style="font-size:14px;font-weight:600;color:#0F172A">📋 Subtask / Tahapan Kegiatan</div>
+        <span style="font-size:11px;color:#94A3B8">Opsional — akan tampil di Gantt RKF</span>
+      </div>
+      <div id="newSubtaskList"></div>
+      <button class="subtask-add-btn" onclick="addNewSubtask()">＋ Tambah Subtask</button>
+    </div>
+    <div class="form-actions">
+      <button class="btn-primary" onclick="addProject()">💾 Simpan Project</button>
+      <button class="btn-ghost" onclick="closeModal('addProjectModal')">Batal</button>
+    </div>
+  </div>
+</div>
+
+<!-- UPDATE MODAL -->
+<div class="modal-overlay" id="updateModal">
+  <div class="modal" style="width:640px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+      <div style="font-size:16px;font-weight:600;color:#0F172A">Update Status Project</div>
+      <button class="close-btn" onclick="closeModal('updateModal')">✕</button>
+    </div>
+    <div class="form-grid">
+      <div class="form-group"><label>Status Baru</label><select id="u_status"><option value="">-- Tidak Berubah --</option><option>Planning</option><option>On Track</option><option>At Risk</option><option>Delayed</option><option>Completed</option><option>On Hold</option></select></div>
+      <div class="form-group"><label>Progress (%)</label><input type="number" id="u_progress" min="0" max="100"></div>
+      <div class="form-group"><label>Realisasi Budget (Rp)</label><input type="number" id="u_spent"></div>
+      <div class="form-group"><label>Tanggal Update</label><input type="date" id="u_date"></div>
+      <div class="form-group full"><label>Catatan</label><textarea id="u_note" rows="2" placeholder="Progress, hambatan, rencana aksi..."></textarea></div>
+    </div>
+
+    <!-- SUBDIVISI & UNIT BISNIS EDIT SECTION -->
+    <div style="margin-top:18px;border-top:1px solid #F1F5F9;padding-top:16px">
+      <div style="font-size:14px;font-weight:600;color:#0F172A;margin-bottom:10px">🏢 Kategori, Subdivisi &amp; Unit Bisnis</div>
+      <div class="form-grid">
+        <div class="form-group"><label>Kategori Project</label><select id="u_cat"></select></div>
+        <div class="form-group"><label>Subdivisi TSI</label><select id="u_subdivisi"></select></div>
+        <div class="form-group"><label>Unit Bisnis</label><select id="u_unitBisnis"></select></div>
+        <div class="form-group full"><label>PIC Subdivisi <span style="color:#94A3B8;font-weight:400">(bisa lebih dari satu)</span></label><div class="multi-check-box" id="u_picSubdivisi_box"></div></div>
+        <div class="form-group full"><label>PIC Unit Bisnis <span style="color:#94A3B8;font-weight:400">(bisa lebih dari satu)</span></label><div class="multi-check-box" id="u_picUnitBisnis_box"></div></div>
+      </div>
+    </div>
+
+    <!-- SUBTASK EDIT SECTION -->
+    <div style="margin-top:20px;border-top:1px solid #F1F5F9;padding-top:18px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <div style="font-size:14px;font-weight:600;color:#0F172A">📋 Edit Subtask / Tahapan</div>
+        <button onclick="addEditSubtask()" style="background:#EEF2FF;color:#4338CA;border:none;border-radius:7px;padding:6px 12px;cursor:pointer;font-size:12px;font-weight:500;display:flex;align-items:center;gap:5px">＋ Tambah Subtask</button>
+      </div>
+      <div id="subtaskUpdateList"></div>
+    </div>
+
+    <div class="form-actions">
+      <button class="btn-primary" onclick="applyUpdate()">✅ Simpan Update</button>
+      <button class="btn-ghost" onclick="closeModal('updateModal')">Batal</button>
+    </div>
+  </div>
+</div>
+
+<!-- MASTER DATA MODAL -->
+<div class="modal-overlay" id="masterDataModal">
+  <div class="modal" style="width:780px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
+      <div><div style="font-size:16px;font-weight:600;color:#0F172A">⚙️ Kelola Data Master</div><div style="font-size:12px;color:#94A3B8;margin-top:2px">Tambah/hapus pilihan untuk Subdivisi TSI, Unit Bisnis, dan PIC-nya</div></div>
+      <button class="close-btn" onclick="closeModal('masterDataModal')">✕</button>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px" id="masterDataGrid"></div>
+    <div class="form-actions">
+      <button class="btn-ghost" onclick="closeModal('masterDataModal')">Tutup</button>
+    </div>
+  </div>
+</div>
+
+<!-- GANTT MODAL -->
+<div class="modal-overlay" id="ganttModal">
+  <div class="modal" style="width:98vw;max-width:1100px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+      <div style="font-size:16px;font-weight:600;color:#0F172A" id="ganttModalTitle">Gantt RKF</div>
+      <div style="display:flex;gap:8px">
+        <button class="btn-outline btn-sm" onclick="window.print()">🖨️ Print</button>
+        <button class="close-btn" onclick="closeModal('ganttModal')">✕</button>
+      </div>
+    </div>
+    <div id="ganttModalContent"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<script>
+const TODAY=new Date();TODAY.setHours(0,0,0,0);
+const MONTH_NAMES=["JANUARI","FEBRUARI","MARET","APRIL","MEI","JUNI","JULI","AGUSTUS","SEPTEMBER","OKTOBER","NOVEMBER","DESEMBER"];
+const MONTH_COLORS=["#E04343","#E07843","#E04343","#5A8A3C","#1B3A6B","#E04343","#5A8A3C","#E07843","#1B3A6B","#E04343","#5A8A3C","#E07843"];
+let projects=[
+  {id:1,name:"Review Aplikasi Service Desk & Knowledge Management",pic:"Budi Santoso",cat:"Application",status:"Completed",priority:"Critical",start:"2026-01-05",end:"2026-03-14",budget:750000000,spent:740000000,progress:100,desc:"Review Aplikasi Service Desk dan Penambahan Katalog Knowledge Management.",updates:[{date:"2026-03-14",status:"Completed",note:"Project selesai sesuai target."}],
+   subtasks:[
+     {id:1,name:"Usulan Ke Direksi",status:"done",weeks:[{m:1,w:1}],isMilestone:false},
+     {id:2,name:"KAK (Kerangka Aktual Kerja)",status:"done",weeks:[{m:1,w:2}],isMilestone:false},
+     {id:3,name:"RKS (Rencana Kerja & Syarat)",status:"done",weeks:[{m:1,w:3}],isMilestone:false},
+     {id:4,name:"HPS (Harga Perkiraan Sendiri)",status:"done",weeks:[{m:1,w:4}],isMilestone:false},
+     {id:5,name:"Usulan Pengesahan KAK, RKS, HPS",status:"done",weeks:[{m:2,w:1}],isMilestone:false},
+     {id:6,name:"Permintaan Penawaran",status:"done",weeks:[{m:2,w:2}],isMilestone:false},
+     {id:7,name:"BA Pembukaan Dokumen Penawaran",status:"done",weeks:[{m:2,w:3}],isMilestone:false},
+     {id:8,name:"Evaluasi Dokumen Penawaran",status:"done",weeks:[{m:2,w:4}],isMilestone:false},
+     {id:9,name:"BA Evaluasi Dokumen Penawaran",status:"done",weeks:[{m:3,w:1},{m:3,w:2}],isMilestone:false},
+     {id:10,name:"Negosiasi Harga",status:"done",weeks:[{m:3,w:2}],isMilestone:false},
+     {id:11,name:"Berita Acara Negosiasi Harga",status:"done",weeks:[{m:3,w:2}],isMilestone:false},
+     {id:12,name:"Usulan Penetapan Persetujuan Biaya",status:"done",weeks:[{m:3,w:2}],isMilestone:false},
+     {id:13,name:"NDA",status:"done",weeks:[{m:3,w:2}],isMilestone:false},
+     {id:14,name:"PKS",status:"done",weeks:[{m:3,w:2}],isMilestone:true},
+   ]},
+  {id:2,name:"Cloud Migration Phase 2",pic:"Dewi Rahayu",cat:"Infrastructure",status:"At Risk",priority:"High",start:"2026-02-01",end:"2026-07-10",budget:1800000000,spent:1200000000,progress:65,desc:"Migrasi workload on-premise ke AWS.",updates:[{date:"2026-05-20",status:"At Risk",note:"Kendala teknis pada migrasi database legacy."}],
+   subtasks:[
+     {id:1,name:"Assessment & Inventory",status:"done",weeks:[{m:2,w:1},{m:2,w:2}],isMilestone:false},
+     {id:2,name:"Desain Arsitektur Cloud",status:"done",weeks:[{m:2,w:3},{m:2,w:4}],isMilestone:false},
+     {id:3,name:"Setup Environment AWS",status:"done",weeks:[{m:3,w:1},{m:3,w:2}],isMilestone:false},
+     {id:4,name:"Migrasi Database",status:"process",weeks:[{m:3,w:3},{m:3,w:4},{m:4,w:1}],isMilestone:false},
+     {id:5,name:"Migrasi Aplikasi",status:"process",weeks:[{m:4,w:2},{m:4,w:3},{m:4,w:4}],isMilestone:false},
+     {id:6,name:"UAT & Testing",status:"pending",weeks:[{m:5,w:1},{m:5,w:2}],isMilestone:false},
+     {id:7,name:"Go Live",status:"pending",weeks:[{m:5,w:3}],isMilestone:true},
+   ]},
+  {id:3,name:"Mobile Banking App v3.0",pic:"Rizky Pratama",cat:"Application",status:"On Track",priority:"High",start:"2026-03-01",end:"2026-08-15",budget:950000000,spent:310000000,progress:33,desc:"Pengembangan fitur baru mobile banking.",updates:[],
+   subtasks:[
+     {id:1,name:"Requirements & Wireframe",status:"done",weeks:[{m:3,w:1},{m:3,w:2}],isMilestone:false},
+     {id:2,name:"UI/UX Design",status:"done",weeks:[{m:3,w:3},{m:3,w:4}],isMilestone:false},
+     {id:3,name:"Development Sprint 1",status:"process",weeks:[{m:4,w:1},{m:4,w:2},{m:4,w:3},{m:4,w:4}],isMilestone:false},
+     {id:4,name:"Development Sprint 2",status:"pending",weeks:[{m:5,w:1},{m:5,w:2},{m:5,w:3},{m:5,w:4}],isMilestone:false},
+     {id:5,name:"Integration & Testing",status:"pending",weeks:[{m:6,w:1},{m:6,w:2}],isMilestone:false},
+     {id:6,name:"Release to Production",status:"pending",weeks:[{m:6,w:3}],isMilestone:true},
+   ]},
+  {id:4,name:"Data Warehouse Modernization",pic:"Sari Wulandari",cat:"Data & Analytics",status:"Planning",priority:"Medium",start:"2026-04-01",end:"2026-12-31",budget:3200000000,spent:120000000,progress:5,desc:"Modernisasi infrastruktur data warehouse.",updates:[],subtasks:[]},
+  {id:5,name:"ERP Integration SAP",pic:"Fajar Nugroho",cat:"Integration",status:"Delayed",priority:"High",start:"2026-01-10",end:"2026-06-30",budget:1200000000,spent:950000000,progress:70,desc:"Integrasi sistem ERP dengan SAP S/4HANA.",updates:[],
+   subtasks:[
+     {id:1,name:"Business Blueprint",status:"done",weeks:[{m:1,w:2},{m:1,w:3},{m:1,w:4}],isMilestone:false},
+     {id:2,name:"Konfigurasi SAP",status:"done",weeks:[{m:2,w:1},{m:2,w:2},{m:2,w:3},{m:2,w:4}],isMilestone:false},
+     {id:3,name:"Data Migration",status:"process",weeks:[{m:3,w:1},{m:3,w:2}],isMilestone:false},
+     {id:4,name:"Integration Testing",status:"process",weeks:[{m:3,w:3},{m:3,w:4}],isMilestone:false},
+     {id:5,name:"User Acceptance Test",status:"pending",weeks:[{m:4,w:1},{m:4,w:2}],isMilestone:false},
+     {id:6,name:"Go Live & Cutover",status:"pending",weeks:[{m:4,w:3}],isMilestone:true},
+   ]},
+];
+let currentDetailId=null,currentReport='summary',newSubtaskCounter=0;
+const fmt=n=>"Rp "+(n||0).toLocaleString("id-ID");
+const fmtDate=d=>d?new Date(d).toLocaleDateString("id-ID",{day:"2-digit",month:"short",year:"numeric"}):"-";
+const pct=(a,b)=>b?Math.round(a/b*100):0;
+const statusKey=s=>({"Planning":"planning","On Track":"ontrack","At Risk":"atrisk","Delayed":"delayed","Completed":"completed","On Hold":"onhold"})[s]||"planning";
+const priKey=p=>p.toLowerCase();
+function progressColor(v){return v>=80?"#10B981":v>=50?"#6366F1":v>=30?"#F59E0B":"#EF4444"}
+function statusDistStyle(s){return({"Planning":{bg:"#EEF2FF",text:"#3730A3",dot:"#6366F1"},"On Track":{bg:"#ECFDF5",text:"#065F46",dot:"#10B981"},"At Risk":{bg:"#FFFBEB",text:"#92400E",dot:"#F59E0B"},"Delayed":{bg:"#FEF2F2",text:"#991B1B",dot:"#EF4444"},"Completed":{bg:"#F0FDF4",text:"#14532D",dot:"#22C55E"},"On Hold":{bg:"#F9FAFB",text:"#374151",dot:"#9CA3AF"}})[s]||{bg:"#F9FAFB",text:"#374151",dot:"#9CA3AF"}}
+function badgeHTML(s){return`<span class="badge badge-${statusKey(s)}"><span class="badge-dot"></span>${s}</span>`}
+function priBadge(p){return`<span class="pri-${priKey(p)}">${p}</span>`}
+function progressBarHTML(v){return`<div class="progress-wrap"><div class="progress-bar" style="width:${v}%;background:${progressColor(v)}"></div></div>`}
+function toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2800)}
+function getAlertInfo(p){
+  const end=new Date(p.end);end.setHours(0,0,0,0);
+  const daysToEnd=Math.round((end-TODAY)/86400000);
+  const isCompleted=p.status==="Completed"||p.progress===100;
+  if(isCompleted&&daysToEnd>0)return{type:"early",label:`✅ Selesai ${daysToEnd} hari lebih cepat`,css:"alert-early",cardCss:"card-early",days:daysToEnd};
+  if(daysToEnd<0&&!isCompleted)return{type:"overdue",label:`🚨 Overdue ${Math.abs(daysToEnd)} hari`,css:"alert-overdue2",cardCss:"card-overdue",days:Math.abs(daysToEnd)};
+  if(daysToEnd===0&&!isCompleted)return{type:"overdue",label:"🚨 Deadline HARI INI!",css:"alert-overdue2",cardCss:"card-critical",days:0};
+  if(daysToEnd<=7&&!isCompleted)return{type:"critical",label:`⚠️ ${daysToEnd} hari lagi`,css:"alert-critical",cardCss:"card-critical",days:daysToEnd};
+  if(daysToEnd<=14&&!isCompleted)return{type:"warning",label:`⏰ ${daysToEnd} hari lagi`,css:"alert-warning",cardCss:"card-warning",days:daysToEnd};
+  if(daysToEnd<=30&&!isCompleted)return{type:"soon",label:`📅 ${daysToEnd} hari lagi`,css:"alert-soon",cardCss:"card-soon",days:daysToEnd};
+  if(isCompleted&&daysToEnd<=0)return{type:"ontime",label:"✅ Selesai tepat waktu",css:"alert-early",cardCss:"",days:0};
+  return{type:"normal",label:`${daysToEnd} hari lagi`,css:"",cardCss:"",days:daysToEnd};
+}
+function alertBadgeHTML(p){const a=getAlertInfo(p);if(!a.css)return`<span style="font-size:12px;color:#94A3B8">${a.label}</span>`;return`<span class="${a.css}">${a.label}</span>`}
+function getAlertCounts(list){list=list||projects;return{overdue:list.filter(p=>getAlertInfo(p).type==="overdue").length,critical:list.filter(p=>getAlertInfo(p).type==="critical").length,warning:list.filter(p=>getAlertInfo(p).type==="warning").length,soon:list.filter(p=>getAlertInfo(p).type==="soon").length,early:list.filter(p=>getAlertInfo(p).type==="early").length}}
+function updateNavBadge(){const c=getAlertCounts();const total=c.overdue+c.critical;const nav=document.getElementById('navAlert');const ex=nav.querySelector('.nav-badge');if(ex)ex.remove();if(total>0){const b=document.createElement('span');b.className='nav-badge';b.textContent=total;nav.appendChild(b)}}
+function calcProgressFromSubtasks(st){if(!st||!st.length)return null;return Math.round(st.filter(s=>s.status==="done").length/st.length*100)}
+function subtaskStatusLabel(s){return{done:"✅ Selesai",process:"🔄 Proses",pending:"❌ Belum",none:"—"}[s]||"—"}
+function navTo(name){showView(name,document.querySelectorAll('.nav-btn')[{projects:1,alerts:2,report:3}[name]||0])}
+function showView(name,btn){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('view-'+name).classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+  document.getElementById('pageTitle').textContent={dashboard:'Dashboard Overview',projects:'Project List',alerts:'🔔 Timeline Alerts',report:'Report'}[name]||name;
+  document.getElementById('topbarActions').innerHTML=(name==='projects'||name==='dashboard')?`<button class="btn-primary edit-only" onclick="openModal('addProjectModal')">＋ Input Project</button>`:'';
+  if(name==='dashboard')renderDashboard();
+  if(name==='projects'){document.getElementById('projectList').style.display='';document.getElementById('projectDetail').style.display='none';renderProjects();}
+  if(name==='alerts')renderAlertView();
+  if(name==='report'){populateReportFilterSelects();renderReport(currentReport);}
+}
+// ---- Edit subtask counter for update modal ----
+let editSubtaskCounter = 0;
+
+function buildUpdateModalSubtasks(p){
+  const sl = document.getElementById('subtaskUpdateList');
+  if(!p.subtasks || !p.subtasks.length){
+    sl.innerHTML = `<div style="text-align:center;padding:20px;color:#94A3B8;font-size:13px;background:#F8FAFC;border-radius:8px;border:1px dashed #E2E8F0">Belum ada subtask. Klik "+ Tambah Subtask" untuk menambahkan.</div>`;
+    return;
+  }
+  const pMonths = getProjectMonths(p.start, p.end);
+  const MNAMES = ["Jan","Feb","Mar","Apr","Mei","Jun","Jul","Agu","Sep","Okt","Nov","Des"];
+  sl.innerHTML = p.subtasks.map((s, i) => {
+    const wkHtml = pMonths.map(m =>
+      [1,2,3,4].map(w => {
+        const checked = s.weeks && s.weeks.some(wk=>wk.m===m.month&&wk.w===w) ? 'checked' : '';
+        return `<label style="display:inline-flex;align-items:center;gap:2px;font-size:10px;color:#374151;cursor:pointer;margin:1px 3px">
+          <input type="checkbox" class="uw-cb-${s.id}" data-m="${m.month}" data-w="${w}" ${checked} style="margin:0;width:12px;height:12px">
+          <span>${MNAMES[m.month-1]}W${w}</span></label>`;
+      }).join('')
+    ).join('');
+    return `<div id="est_${s.id}" style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;padding:12px 14px;margin-bottom:8px">
+      <!-- Row 1: no, name, status, milestone, actions -->
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px">
+        <div style="width:24px;height:24px;border-radius:50%;background:#6366F133;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#4338CA">${i+1}</div>
+        <input type="text" id="est_name_${s.id}" value="${s.name}" style="flex:1;min-width:140px;padding:6px 10px;border:1px solid #E2E8F0;border-radius:7px;font-size:13px;font-family:inherit;font-weight:500;color:#1E293B;outline:none" onfocus="this.style.borderColor='#6366F1'" onblur="this.style.borderColor='#E2E8F0'">
+        <select id="us_${s.id}" onchange="syncSubtaskProgress(${p.id})" style="font-size:12px;padding:6px 8px;border:1px solid #E2E8F0;border-radius:7px;background:#fff;color:#374151;cursor:pointer;font-family:inherit">
+          <option value="none" ${s.status==='none'?'selected':''}>— Belum ditentukan</option>
+          <option value="pending" ${s.status==='pending'?'selected':''}>❌ Belum</option>
+          <option value="process" ${s.status==='process'?'selected':''}>🔄 Proses</option>
+          <option value="done" ${s.status==='done'?'selected':''}>✅ Selesai</option>
+        </select>
+        <label style="font-size:11px;color:#64748B;display:flex;align-items:center;gap:4px;cursor:pointer;white-space:nowrap">
+          <input type="checkbox" id="est_ms_${s.id}" ${s.isMilestone?'checked':''} style="margin:0;width:13px;height:13px"> ⭐ Milestone
+        </label>
+        <div style="display:flex;gap:4px;margin-left:auto">
+          ${i>0?`<button onclick="moveSubtask(${p.id},${s.id},-1)" title="Geser Naik" style="background:#F1F5F9;border:none;border-radius:5px;width:26px;height:26px;cursor:pointer;font-size:12px">▲</button>`:'<div style="width:26px"></div>'}
+          ${i<p.subtasks.length-1?`<button onclick="moveSubtask(${p.id},${s.id},1)" title="Geser Turun" style="background:#F1F5F9;border:none;border-radius:5px;width:26px;height:26px;cursor:pointer;font-size:12px">▼</button>`:'<div style="width:26px"></div>'}
+          <button onclick="deleteSubtask(${p.id},${s.id})" title="Hapus Subtask" style="background:#FEF2F2;border:none;border-radius:5px;width:26px;height:26px;cursor:pointer;font-size:13px;color:#EF4444">✕</button>
+        </div>
+      </div>
+      <!-- Row 2: week checkboxes -->
+      <div style="font-size:10px;color:#94A3B8;font-weight:500;margin-bottom:4px">📅 Jadwal di Gantt (pilih minggu):</div>
+      <div style="line-height:2">${wkHtml || '<span style="font-size:11px;color:#94A3B8">Tidak ada bulan tersedia</span>'}</div>
+    </div>`;
+  }).join('');
+}
+
+function addEditSubtask(){
+  const p = projects.find(p=>p.id===currentDetailId); if(!p) return;
+  editSubtaskCounter++;
+  const newId = Date.now();
+  if(!p.subtasks) p.subtasks = [];
+  p.subtasks.push({id:newId, name:'Subtask Baru', status:'pending', weeks:[], isMilestone:false});
+  buildUpdateModalSubtasks(p);
+  // Focus on the new name input
+  setTimeout(()=>{ const el=document.getElementById('est_name_'+newId); if(el){el.focus();el.select();} }, 50);
+}
+
+function deleteSubtask(pid, sid){
+  const p = projects.find(p=>p.id===pid); if(!p||!p.subtasks) return;
+  if(!confirm('Hapus subtask ini?')) return;
+  p.subtasks = p.subtasks.filter(s=>s.id!==sid);
+  buildUpdateModalSubtasks(p);
+  syncSubtaskProgress(pid);
+}
+
+function moveSubtask(pid, sid, dir){
+  const p = projects.find(p=>p.id===pid); if(!p||!p.subtasks) return;
+  const idx = p.subtasks.findIndex(s=>s.id===sid); if(idx===-1) return;
+  const newIdx = idx+dir;
+  if(newIdx<0||newIdx>=p.subtasks.length) return;
+  // Save current name/milestone edits before reorder
+  saveSubtaskEditsToMemory(p);
+  [p.subtasks[idx], p.subtasks[newIdx]] = [p.subtasks[newIdx], p.subtasks[idx]];
+  buildUpdateModalSubtasks(p);
+}
+
+function saveSubtaskEditsToMemory(p){
+  // Flush name + milestone edits from DOM into the project data
+  if(!p.subtasks) return;
+  p.subtasks.forEach(s=>{
+    const nameEl = document.getElementById('est_name_'+s.id);
+    const msEl   = document.getElementById('est_ms_'+s.id);
+    const stEl   = document.getElementById('us_'+s.id);
+    if(nameEl) s.name = nameEl.value.trim() || s.name;
+    if(msEl)   s.isMilestone = msEl.checked;
+    if(stEl)   s.status = stEl.value;
+    const wkCbs = document.querySelectorAll(`.uw-cb-${s.id}:checked`);
+    if(wkCbs.length>=0) s.weeks = Array.from(wkCbs).map(cb=>({m:parseInt(cb.dataset.m),w:parseInt(cb.dataset.w)}));
+  });
+}
+
+function openModal(id){
+  if(id==='updateModal'){
+    const p=projects.find(p=>p.id===currentDetailId);
+    if(p){
+      document.getElementById('u_status').value='';
+      document.getElementById('u_progress').value=p.progress;
+      document.getElementById('u_spent').value=p.spent||0;
+      document.getElementById('u_note').value='';
+      document.getElementById('u_date').value=new Date().toISOString().slice(0,10);
+      buildUpdateModalSubtasks(p);
+      populateUpdateModalSelects(p);
+    }
+  }
+  if(id==='addProjectModal'){document.getElementById('newSubtaskList').innerHTML='';newSubtaskCounter=0;populateAddProjectSelects();}
+  if(id==='masterDataModal'){renderMasterDataModal();}
+  document.getElementById(id).classList.add('show');
+}
+function closeModal(id){document.getElementById(id).classList.remove('show')}
+window.addEventListener('click',e=>{if(e.target.classList.contains('modal-overlay'))e.target.classList.remove('show')});
+
+// ---- Master Data (Subdivisi TSI / Unit Bisnis / PIC) ----
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;')}
+function optionsHTML(arr,includeEmpty,emptyLabel){
+  let html=includeEmpty?`<option value="">${emptyLabel||'-- Pilih --'}</option>`:'';
+  html+=(arr||[]).map(v=>`<option value="${esc(v)}">${esc(v)}</option>`).join('');
+  return html;
+}
+function checkboxListHTML(arr,namePrefix,selected){
+  selected=selected||[];
+  if(!arr||!arr.length)return '<span class="empty-hint">Belum ada data. Tambahkan lewat menu ⚙️ Data Master.</span>';
+  return arr.map(v=>`<label><input type="checkbox" class="${namePrefix}-cb" value="${esc(v)}" ${selected.includes(v)?'checked':''}> ${esc(v)}</label>`).join('');
+}
+function populateAddProjectSelects(){
+  document.getElementById('f_cat').innerHTML=optionsHTML(masterData.kategori,false);
+  document.getElementById('f_subdivisi').innerHTML=optionsHTML(masterData.subdivisi,true,'-- Pilih Subdivisi --');
+  document.getElementById('f_unitBisnis').innerHTML=optionsHTML(masterData.unitBisnis,true,'-- Pilih Unit Bisnis --');
+  document.getElementById('f_picSubdivisi_box').innerHTML=checkboxListHTML(masterData.picSubdivisi,'f_picSubdivisi');
+  document.getElementById('f_picUnitBisnis_box').innerHTML=checkboxListHTML(masterData.picUnitBisnis,'f_picUnitBisnis');
+}
+function populateUpdateModalSelects(p){
+  document.getElementById('u_cat').innerHTML=optionsHTML(masterData.kategori,false);
+  document.getElementById('u_cat').value=p.cat||'';
+  document.getElementById('u_subdivisi').innerHTML=optionsHTML(masterData.subdivisi,true,'-- Pilih Subdivisi --');
+  document.getElementById('u_unitBisnis').innerHTML=optionsHTML(masterData.unitBisnis,true,'-- Pilih Unit Bisnis --');
+  document.getElementById('u_subdivisi').value=p.subdivisi||'';
+  document.getElementById('u_unitBisnis').value=p.unitBisnis||'';
+  document.getElementById('u_picSubdivisi_box').innerHTML=checkboxListHTML(masterData.picSubdivisi,'u_picSubdivisi',p.picSubdivisi||[]);
+  document.getElementById('u_picUnitBisnis_box').innerHTML=checkboxListHTML(masterData.picUnitBisnis,'u_picUnitBisnis',p.picUnitBisnis||[]);
+}
+function populateFilterSelects(){
+  const fs=document.getElementById('filterSubdivisi'),fu=document.getElementById('filterUnitBisnis');
+  if(!fs||!fu)return;
+  const curS=fs.value,curU=fu.value;
+  fs.innerHTML='<option value="">Semua Subdivisi</option>'+(masterData.subdivisi||[]).map(v=>`<option>${esc(v)}</option>`).join('');
+  fu.innerHTML='<option value="">Semua Unit Bisnis</option>'+(masterData.unitBisnis||[]).map(v=>`<option>${esc(v)}</option>`).join('');
+  fs.value=curS;fu.value=curU;
+}
+const MASTER_LABELS={kategori:'Kategori Project',subdivisi:'Subdivisi TSI',picSubdivisi:'PIC Subdivisi',unitBisnis:'Unit Bisnis',picUnitBisnis:'PIC Unit Bisnis'};
+function renderMasterDataModal(){
+  const grid=document.getElementById('masterDataGrid');
+  grid.innerHTML=Object.keys(MASTER_LABELS).map(cat=>{
+    const items=masterData[cat]||[];
+    const rows=items.length?items.map((v,i)=>`<div class="master-item-row"><span>${esc(v)}</span><button onclick="removeMasterItem('${cat}',${i})" title="Hapus">✕</button></div>`).join(''):'<div style="font-size:11px;color:#94A3B8">Belum ada data.</div>';
+    return `<div><div class="master-col-title">${MASTER_LABELS[cat]}</div>
+      <div class="master-add-row"><input type="text" id="newitem_${cat}" placeholder="Tambah ${MASTER_LABELS[cat]} baru..." onkeydown="if(event.key==='Enter')addMasterItem('${cat}')"><button onclick="addMasterItem('${cat}')">＋</button></div>
+      <div class="master-list-box">${rows}</div></div>`;
+  }).join('');
+}
+function addMasterItem(cat){
+  if(!ensureDataReady())return;
+  const input=document.getElementById('newitem_'+cat);
+  const val=input.value.trim();
+  if(!val){toast('⚠️ Isi nama terlebih dulu');return;}
+  masterData[cat]=masterData[cat]||[];
+  if(masterData[cat].some(v=>v.toLowerCase()===val.toLowerCase())){toast('⚠️ Data sudah ada');return;}
+  masterData[cat].push(val);
+  input.value='';
+  renderMasterDataModal();
+  populateAddProjectSelects();
+  populateFilterSelects();
+  saveMasterData();
+  toast('✅ Ditambahkan');
+}
+function removeMasterItem(cat,idx){
+  if(!ensureDataReady())return;
+  const val=masterData[cat][idx];
+  if(!confirm(`Hapus "${val}" dari ${MASTER_LABELS[cat]}?`))return;
+  masterData[cat].splice(idx,1);
+  renderMasterDataModal();
+  populateAddProjectSelects();
+  populateFilterSelects();
+  saveMasterData();
+  toast('🗑️ Dihapus');
+}
+function syncSubtaskProgress(pid){const p=projects.find(p=>p.id===pid);if(!p||!p.subtasks)return;const done=p.subtasks.filter(s=>{const el=document.getElementById('us_'+s.id);return el?el.value==='done':s.status==='done';}).length;document.getElementById('u_progress').value=Math.round(done/p.subtasks.length*100);}
+function getProjectMonths(start, end){
+  const months=[];
+  let cur=new Date(new Date(start).getFullYear(),new Date(start).getMonth(),1);
+  const pEnd=new Date(end);
+  while(cur<=pEnd){months.push({year:cur.getFullYear(),month:cur.getMonth()+1});cur=new Date(cur.getFullYear(),cur.getMonth()+1,1);}
+  return months;
+}
+function getMonthsFromProjectForm(){
+  const s=document.getElementById('f_start').value,e=document.getElementById('f_end').value;
+  if(!s||!e)return[];
+  return getProjectMonths(s,e);
+}
+function buildWeekCheckboxes(nsId){
+  const months=getMonthsFromProjectForm();
+  if(!months.length)return'<span style="font-size:11px;color:#F59E0B">⚠ Isi tanggal project dulu</span>';
+  const MNAMES=["Jan","Feb","Mar","Apr","Mei","Jun","Jul","Agu","Sep","Okt","Nov","Des"];
+  return months.map(m=>
+    [1,2,3,4].map(w=>`<label style="display:inline-flex;align-items:center;gap:2px;font-size:10px;color:#374151;cursor:pointer;margin:1px 3px">
+      <input type="checkbox" class="wk-cb" data-ns="${nsId}" data-m="${m.month}" data-w="${w}" style="margin:0;width:12px;height:12px">
+      <span>${MNAMES[m.month-1]}W${w}</span></label>`).join('')
+  ).join('');
+}
+function addNewSubtask(){
+  newSubtaskCounter++;
+  const id='ns_'+newSubtaskCounter;
+  const div=document.createElement('div');
+  div.id=id;
+  div.style.cssText='background:#F8FAFC;border:1px solid #F1F5F9;border-radius:8px;padding:10px 12px;margin-bottom:8px';
+  div.innerHTML=`
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap">
+      <div style="width:22px;height:22px;border-radius:50%;background:#E2E8F0;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#64748B">${newSubtaskCounter}</div>
+      <input type="text" placeholder="Nama subtask / tahapan..." style="flex:1;min-width:160px;padding:6px 10px;border:1px solid #E2E8F0;border-radius:6px;font-size:13px;font-family:inherit">
+      <select class="subtask-status-sel" style="font-size:12px;padding:5px 8px;border:1px solid #E2E8F0;border-radius:6px;background:#fff;color:#374151;cursor:pointer">
+        <option value="none">—</option><option value="pending">❌ Belum</option><option value="process">🔄 Proses</option><option value="done">✅ Selesai</option>
+      </select>
+      <label style="font-size:11px;color:#94A3B8;display:flex;align-items:center;gap:4px;cursor:pointer"><input type="checkbox" class="ms-cb" style="margin:0"> ⭐ Milestone</label>
+      <button style="background:none;border:none;color:#FDA4AF;cursor:pointer;font-size:15px;padding:2px 4px;border-radius:4px" onclick="document.getElementById('${id}').remove()">✕</button>
+    </div>
+    <div style="font-size:11px;color:#64748B;margin-bottom:4px;font-weight:500">📅 Jadwal di Gantt (pilih bulan-minggu):</div>
+    <div class="wk-container-${id}" style="line-height:1.8">${buildWeekCheckboxes(id)}</div>`;
+  document.getElementById('newSubtaskList').appendChild(div);
+}
+function collectNewSubtasks(){
+  const rows=document.getElementById('newSubtaskList').children;
+  const result=[];let ctr=1;
+  Array.from(rows).forEach(row=>{
+    const inp=row.querySelector('input[type="text"]');
+    const sel=row.querySelector('select');
+    const mil=row.querySelector('.ms-cb');
+    const wkCbs=row.querySelectorAll('.wk-cb:checked');
+    const weeks=Array.from(wkCbs).map(cb=>({m:parseInt(cb.dataset.m),w:parseInt(cb.dataset.w)}));
+    if(inp&&inp.value.trim())result.push({id:ctr++,name:inp.value.trim(),status:sel?sel.value:'pending',weeks,isMilestone:mil?mil.checked:false});
+  });
+  return result;
+}
+function renderDashboard(){
+  const total=projects.length,onTrack=projects.filter(p=>p.status==="On Track").length,atRisk=projects.filter(p=>["At Risk","Delayed"].includes(p.status)).length;
+  const totalBudget=projects.reduce((s,p)=>s+p.budget,0),totalSpent=projects.reduce((s,p)=>s+p.spent,0);
+  const avgProg=Math.round(projects.reduce((s,p)=>s+p.progress,0)/total);
+  const ac=getAlertCounts();
+  let banners='';
+  if(ac.overdue>0)banners+=`<div class="alert-banner alert-banner-overdue"><span style="font-size:20px">🚨</span><div style="flex:1"><div style="font-weight:700;color:#991B1B">${ac.overdue} Project Overdue</div><div style="font-size:12px;color:#64748B">Segera tindak lanjuti.</div></div><button class="btn-outline btn-sm" style="border-color:#FECACA;color:#991B1B" onclick="navTo('alerts')">Detail →</button></div>`;
+  if(ac.critical>0)banners+=`<div class="alert-banner alert-banner-warn"><span style="font-size:20px">⚠️</span><div style="flex:1"><div style="font-weight:700;color:#92400E">${ac.critical} Project Kritis (≤7 hari)</div></div><button class="btn-outline btn-sm" style="border-color:#FDE68A;color:#92400E" onclick="navTo('alerts')">Detail →</button></div>`;
+  if(ac.early>0)banners+=`<div class="alert-banner alert-banner-early"><span style="font-size:20px">🎉</span><div style="flex:1"><div style="font-weight:700;color:#14532D">${ac.early} Project Selesai Lebih Cepat!</div></div></div>`;
+  document.getElementById('dashAlertBanners').innerHTML=banners;
+  document.getElementById('statGrid').innerHTML=[{label:"Total Projects",value:total,sub:"Active portfolio",color:"#6366F1",icon:"📁"},{label:"On Track",value:onTrack,sub:`${pct(onTrack,total)}% dari total`,color:"#10B981",icon:"✅"},{label:"Perlu Perhatian",value:atRisk,sub:"At Risk / Delayed",color:"#F59E0B",icon:"⚠️"},{label:"Overdue",value:ac.overdue,sub:"Lewat deadline",color:"#EF4444",icon:"🚨"}].map(c=>`<div class="stat-card"><div class="stat-icon" style="background:${c.color}18">${c.icon}</div><div class="stat-label">${c.label}</div><div class="stat-value">${c.value}</div><div class="stat-sub">${c.sub}</div></div>`).join('');
+  document.getElementById('statGrid2').innerHTML=[{label:"Total Budget",value:fmt(totalBudget),sub:"Semua project",color:"#3B82F6",icon:"💰"},{label:"Total Realisasi",value:fmt(totalSpent),sub:`${pct(totalSpent,totalBudget)}% terserap`,color:"#EC4899",icon:"💸"},{label:"Avg. Progress",value:avgProg+"%",sub:"Penyelesaian portfolio",color:"#F97316",icon:"📈"},{label:"Selesai Awal",value:ac.early,sub:"Lebih cepat dari jadwal",color:"#22C55E",icon:"🎉"}].map(c=>`<div class="stat-card"><div class="stat-icon" style="background:${c.color}18">${c.icon}</div><div class="stat-label">${c.label}</div><div class="stat-value" style="font-size:18px">${c.value}</div><div class="stat-sub">${c.sub}</div></div>`).join('');
+  document.getElementById('dashTableBody').innerHTML=projects.slice(0,6).map(p=>`<tr style="cursor:pointer" onclick="openDetail(${p.id})"><td style="font-weight:500;color:#1E293B">${p.name}</td><td style="color:#64748B">${p.pic}</td><td>${badgeHTML(p.status)}</td><td>${alertBadgeHTML(p)}</td><td style="min-width:130px"><div style="display:flex;align-items:center;gap:8px">${progressBarHTML(p.progress)}<span style="font-size:12px;color:#64748B;min-width:30px">${p.progress}%</span></div></td><td style="color:#64748B;font-size:12px">${fmt(p.budget)}</td></tr>`).join('');
+  const statuses=["Planning","On Track","At Risk","Delayed","Completed","On Hold"];
+  document.getElementById('statusDist').innerHTML=statuses.map(s=>{const c=statusDistStyle(s),cnt=projects.filter(p=>p.status===s).length;return`<div class="status-dist-item" style="background:${c.bg}"><div class="status-dist-num" style="color:${c.text}">${cnt}</div><div class="status-dist-label" style="color:${c.text}">${s}</div></div>`;}).join('');
+  updateNavBadge();
+}
+function renderAlertView(){
+  const ac=getAlertCounts();
+  const overdue=projects.filter(p=>getAlertInfo(p).type==="overdue");
+  const critical=projects.filter(p=>getAlertInfo(p).type==="critical");
+  const warning=projects.filter(p=>getAlertInfo(p).type==="warning");
+  const soon=projects.filter(p=>getAlertInfo(p).type==="soon");
+  const early=projects.filter(p=>getAlertInfo(p).type==="early");
+  let html=`<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-bottom:20px">${[{label:"Overdue",n:ac.overdue,bg:"#FEF2F2",c:"#991B1B",ic:"🚨"},{label:"Kritis ≤7hr",n:ac.critical,bg:"#FFFBEB",c:"#92400E",ic:"⚠️"},{label:"Warning ≤14hr",n:ac.warning,bg:"#FFF7ED",c:"#C2410C",ic:"⏰"},{label:"Segera ≤30hr",n:ac.soon,bg:"#EFF6FF",c:"#1D4ED8",ic:"📅"},{label:"Selesai Awal",n:ac.early,bg:"#F0FDF4",c:"#14532D",ic:"🎉"}].map(x=>`<div style="background:${x.bg};border-radius:12px;padding:14px;text-align:center"><div style="font-size:20px">${x.ic}</div><div style="font-size:24px;font-weight:700;color:${x.c}">${x.n}</div><div style="font-size:11px;font-weight:500;color:${x.c}">${x.label}</div></div>`).join('')}</div>`;
+  function sec(title,hbg,hc,bc,list){if(!list.length)return'';return`<div class="alert-view-card" style="border-left:4px solid ${bc}"><div class="alert-view-header" style="background:${hbg}"><span style="font-size:18px">${title.split(' ')[0]}</span><span style="font-weight:700;font-size:14px;color:${hc}">${title.split(' ').slice(1).join(' ')}</span><span style="margin-left:auto;background:${bc};color:#fff;padding:2px 10px;border-radius:99px;font-size:12px;font-weight:700">${list.length}</span></div>${list.map(p=>{const a=getAlertInfo(p);return`<div class="alert-row"><div style="flex:1;min-width:160px"><button class="alert-project-link" onclick="openDetail(${p.id})">${p.name}</button><div style="font-size:12px;color:#64748B">${p.cat} · PIC: ${p.pic}</div></div>${badgeHTML(p.status)}${priBadge(p.priority)}<span class="${a.css}">${a.label}</span><div style="text-align:right;min-width:100px"><div style="font-size:12px;color:#64748B">Deadline: ${fmtDate(p.end)}</div><div style="font-size:12px;color:#94A3B8">Progress: ${p.progress}%</div></div></div>`;}).join('')}</div>`;}
+  html+=sec("🚨 OVERDUE","#FEF2F2","#991B1B","#EF4444",overdue)+sec("⚠️ KRITIS — Deadline dalam 7 Hari","#FFFBEB","#92400E","#F59E0B",critical)+sec("⏰ WARNING — Deadline dalam 14 Hari","#FFF7ED","#C2410C","#F97316",warning)+sec("📅 SEGERA — Deadline dalam 30 Hari","#EFF6FF","#1D4ED8","#6366F1",soon)+sec("🎉 SELESAI LEBIH CEPAT","#F0FDF4","#14532D","#22C55E",early);
+  if(!overdue.length&&!critical.length&&!warning.length&&!soon.length&&!early.length)html+=`<div class="empty-state" style="background:#fff;border-radius:12px;border:1px solid #E2E8F0"><div style="font-size:48px;margin-bottom:10px">🎯</div><div style="font-weight:600;color:#374151">Semua Project On Track</div></div>`;
+  document.getElementById('alertViewContent').innerHTML=html;updateNavBadge();
+}
+function renderProjects(){
+  const search=(document.getElementById('searchInput').value||'').toLowerCase();
+  const fS=document.getElementById('filterStatus').value,fP=document.getElementById('filterPriority').value,fA=document.getElementById('filterAlert').value;
+  const fSub=document.getElementById('filterSubdivisi').value,fUnit=document.getElementById('filterUnitBisnis').value;
+  let filtered=projects.filter(p=>(!fS||p.status===fS)&&(!fP||p.priority===fP)&&(!fSub||p.subdivisi===fSub)&&(!fUnit||p.unitBisnis===fUnit)&&(!search||(p.name+p.pic+p.cat).toLowerCase().includes(search)));
+  if(fA)filtered=filtered.filter(p=>getAlertInfo(p).type===fA);
+  document.getElementById('filterCount').textContent=filtered.length+' project';
+  document.getElementById('projectCards').innerHTML=filtered.length===0?'<div class="empty-state">Tidak ada project.</div>':filtered.map(p=>{
+    const a=getAlertInfo(p);const st=p.subtasks||[];const done=st.filter(s=>s.status==='done').length;
+    const stChip=st.length>0?`<span style="font-size:11px;background:#EEF2FF;color:#4338CA;padding:2px 8px;border-radius:6px">📋 ${done}/${st.length} subtask</span>`:'';
+    return`<div class="project-card ${a.cardCss}" onclick="openDetail(${p.id})"><div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px"><div style="flex:1"><div style="display:flex;gap:6px;align-items:center;margin-bottom:4px"><span class="chip">${p.cat}</span>${priBadge(p.priority)}${stChip}</div><div style="font-size:15px;font-weight:600;color:#0F172A;margin-bottom:2px">${p.name}</div><div style="font-size:12px;color:#64748B">PIC: ${p.pic}</div></div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px"><div style="display:flex;align-items:center;gap:6px">${badgeHTML(p.status)}<button class="edit-only" onclick="deleteProject(${p.id},event)" title="Hapus Project" style="background:#FEF2F2;border:none;border-radius:6px;width:22px;height:22px;flex-shrink:0;cursor:pointer;font-size:11px;color:#EF4444">✕</button></div>${a.css?`<span class="${a.css}">${a.label}</span>`:''}</div></div><div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">${progressBarHTML(p.progress)}<span style="font-size:12px;color:#64748B;min-width:34px;font-weight:600">${p.progress}%</span></div><div style="display:flex;gap:16px;font-size:12px;color:#64748B;flex-wrap:wrap"><span>📅 ${fmtDate(p.start)} — ${fmtDate(p.end)}</span><span>💰 ${fmt(p.budget)}</span><span style="margin-left:auto;color:#6366F1;font-weight:500">Detail →</span></div></div>`;
+  }).join('');
+}
+function openDetail(id){
+  currentDetailId=id;
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));document.getElementById('view-projects').classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));document.querySelectorAll('.nav-btn')[1].classList.add('active');
+  document.getElementById('pageTitle').textContent='Project List';
+  document.getElementById('projectList').style.display='none';document.getElementById('projectDetail').style.display='';
+  document.getElementById('topbarActions').innerHTML=`<div style="display:flex;gap:8px"><button class="btn-outline edit-only" onclick="openModal('updateModal')">✏️ Update Status</button><button class="btn-primary" onclick="showGantt(${id})">📊 Gantt RKF</button><button class="btn-ghost edit-only" style="color:#EF4444;border-color:#FECACA" onclick="deleteProject(${id})">🗑️ Hapus</button></div>`;
+  renderDetail();
+}
+function renderDetail(){
+  const p=projects.find(p=>p.id===currentDetailId);if(!p)return;
+  const budUtil=pct(p.spent,p.budget);const a=getAlertInfo(p);
+  const end=new Date(p.end);end.setHours(0,0,0,0);const start=new Date(p.start);start.setHours(0,0,0,0);
+  const totalDays=Math.max(1,Math.round((end-start)/86400000));const elapsed=Math.round((TODAY-start)/86400000);
+  const elapsedPct=Math.min(100,Math.max(0,Math.round(elapsed/totalDays*100)));
+  const barColor=a.type==="overdue"?"#EF4444":a.type==="critical"?"#F59E0B":a.type==="early"?"#22C55E":"#6366F1";
+  let alertBox='';
+  if(a.type!=='normal'){
+    const as2={overdue:{bg:"#FEF2F2",border:"#FECACA",text:"#991B1B",title:"🚨 Project Overdue!"},critical:{bg:"#FFFBEB",border:"#FDE68A",text:"#92400E",title:"⚠️ Deadline Kritis!"},warning:{bg:"#FFF7ED",border:"#FED7AA",text:"#C2410C",title:"⏰ Mendekati Deadline"},soon:{bg:"#EFF6FF",border:"#BFDBFE",text:"#1D4ED8",title:"📅 Deadline Dalam Waktu Dekat"},early:{bg:"#F0FDF4",border:"#BBF7D0",text:"#14532D",title:"🎉 Selesai Lebih Cepat!"},ontime:{bg:"#F0FDF4",border:"#A7F3D0",text:"#065F46",title:"✅ Selesai Tepat Waktu"}};
+    const msgs={overdue:`Telah melewati deadline <strong>${a.days} hari</strong>.`,critical:`Sisa <strong>${a.days} hari</strong>. Pastikan semua deliverable siap.`,warning:`Deadline dalam <strong>${a.days} hari</strong>. Pantau progres harian.`,soon:`Deadline dalam <strong>${a.days} hari</strong>.`,early:`Berhasil selesai <strong>${a.days} hari lebih awal</strong>!`,ontime:`Project diselesaikan sesuai timeline.`};
+    const s=as2[a.type]||as2.ontime;alertBox=`<div style="background:${s.bg};border:1px solid ${s.border};border-radius:10px;padding:14px 18px;margin-bottom:18px"><div style="font-weight:700;color:${s.text};margin-bottom:4px">${s.title}</div><div style="font-size:13px;color:${s.text}">${msgs[a.type]||''}</div></div>`;
+  }
+  let subtaskHTML='';
+  if(p.subtasks&&p.subtasks.length){
+    const stDone=p.subtasks.filter(s=>s.status==='done').length,stProc=p.subtasks.filter(s=>s.status==='process').length;
+    subtaskHTML=`<div class="divider"></div><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px"><div class="section-title" style="margin:0">📋 Subtask / Tahapan Kegiatan</div><div style="display:flex;gap:8px;font-size:12px"><span style="background:#F0FDF4;color:#14532D;padding:3px 10px;border-radius:99px;font-weight:500">✅ ${stDone} Selesai</span><span style="background:#FFFBEB;color:#92400E;padding:3px 10px;border-radius:99px;font-weight:500">🔄 ${stProc} Proses</span><span style="background:#F8FAFC;color:#64748B;padding:3px 10px;border-radius:99px;font-weight:500">📋 ${p.subtasks.length} Total</span></div></div><div style="background:#F8FAFC;border-radius:10px;overflow:hidden"><table style="width:100%;border-collapse:collapse"><thead><tr style="background:#F1F5F9"><th style="padding:9px 14px;text-align:left;font-size:11px;color:#94A3B8;font-weight:600;text-transform:uppercase">No</th><th style="padding:9px 14px;text-align:left;font-size:11px;color:#94A3B8;font-weight:600;text-transform:uppercase">Tahapan</th><th style="padding:9px 14px;text-align:center;font-size:11px;color:#94A3B8;font-weight:600;text-transform:uppercase">Status</th><th style="padding:9px 14px;text-align:center;font-size:11px;color:#94A3B8;font-weight:600;text-transform:uppercase">Milestone</th></tr></thead><tbody>${p.subtasks.map((s,i)=>{const sc={done:{bg:"#F0FDF4",text:"#14532D"},process:{bg:"#FFFBEB",text:"#92400E"},pending:{bg:"#FEF2F2",text:"#991B1B"},none:{bg:"#F8FAFC",text:"#94A3B8"}};const c=sc[s.status]||sc.none;return`<tr style="border-top:1px solid #E2E8F0"><td style="padding:10px 14px;font-weight:700;color:#64748B;width:40px">${i+1}</td><td style="padding:10px 14px;font-size:13px;color:#1E293B;font-weight:${s.isMilestone?600:400}">${s.name}${s.isMilestone?' ⭐':''}</td><td style="padding:10px 14px;text-align:center"><span style="background:${c.bg};color:${c.text};padding:3px 10px;border-radius:99px;font-size:11px;font-weight:500">${subtaskStatusLabel(s.status)}</span></td><td style="padding:10px 14px;text-align:center">${s.isMilestone?'⭐':'—'}</td></tr>`;}).join('')}</tbody></table></div>`;
+  }
+  const updatesHTML=p.updates.length===0?`<div style="background:#F8FAFC;border-radius:8px;padding:16px;text-align:center;color:#94A3B8;font-size:13px">Belum ada catatan update.</div>`:p.updates.map(u=>`<div class="update-log"><div class="update-dot"></div><div class="update-body"><div class="update-meta">${badgeHTML(u.status)}<span class="update-date">${fmtDate(u.date)}</span></div><p style="font-size:13px;color:#374151;margin:0">${u.note}</p></div></div>`).join('');
+  const chipOrDash=v=>v?`<span class="chip">${v}</span>`:'<span style="color:#94A3B8;font-size:12px">—</span>';
+  const chipListOrDash=arr=>(arr&&arr.length)?arr.map(v=>`<span class="chip">${v}</span>`).join(' '):'<span style="color:#94A3B8;font-size:12px">—</span>';
+  const unitBisnisHTML=`<div class="divider"></div><div class="section-title">🏢 Subdivisi &amp; Unit Bisnis</div><div class="detail-grid"><div class="detail-card"><div class="detail-label">Subdivisi TSI</div><div style="margin-top:6px">${chipOrDash(p.subdivisi)}</div></div><div class="detail-card"><div class="detail-label">Unit Bisnis</div><div style="margin-top:6px">${chipOrDash(p.unitBisnis)}</div></div><div class="detail-card"><div class="detail-label">PIC Subdivisi</div><div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:4px">${chipListOrDash(p.picSubdivisi)}</div></div><div class="detail-card"><div class="detail-label">PIC Unit Bisnis</div><div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:4px">${chipListOrDash(p.picUnitBisnis)}</div></div></div>`;
+  document.getElementById('projectDetail').innerHTML=`<button class="back-btn" onclick="backToList()">← Kembali ke Project List</button><div style="background:#fff;border:1px solid #E2E8F0;border-radius:12px;padding:24px"><div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px;flex-wrap:wrap;gap:12px"><div><div style="display:flex;gap:8px;margin-bottom:8px"><span class="chip">${p.cat}</span>${priBadge(p.priority)}</div><h2 style="margin:0;font-size:20px;font-weight:700;color:#0F172A">${p.name}</h2><p style="margin:6px 0 0;color:#64748B;font-size:13px;max-width:600px">${p.desc}</p></div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">${badgeHTML(p.status)}${a.css?`<span class="${a.css}">${a.label}</span>`:''}</div></div>${alertBox}<div class="detail-grid"><div class="detail-card"><div class="detail-label">PIC</div><div class="detail-value">${p.pic}</div></div><div class="detail-card"><div class="detail-label">Timeline</div><div style="margin-top:6px;position:relative;height:24px;background:#F1F5F9;border-radius:99px;overflow:visible"><div style="position:absolute;top:0;left:0;height:100%;width:${elapsedPct}%;background:${barColor}22;border-radius:99px"></div>${elapsedPct<=100?`<div style="position:absolute;top:-3px;left:${elapsedPct}%;width:3px;height:30px;background:${barColor};border-radius:2px"></div>`:''}</div><div style="display:flex;justify-content:space-between;font-size:11px;color:#94A3B8;margin-top:5px"><span>${fmtDate(p.start)}</span><span style="font-weight:600;color:${barColor}">${a.label}</span><span>${fmtDate(p.end)}</span></div></div><div class="detail-card"><div class="detail-label">Progress</div><div style="margin-top:8px">${progressBarHTML(p.progress)}</div><div class="detail-value" style="margin-top:6px">${p.progress}%</div></div><div class="detail-card"><div class="detail-label">Budget Utilization</div><div style="margin-top:8px">${progressBarHTML(Math.min(budUtil,100))}</div><div class="budget-row"><span>Realisasi: ${fmt(p.spent)}</span><span class="${budUtil>90?'text-red':budUtil>70?'text-amber':'text-green'}">${budUtil}% dari ${fmt(p.budget)}</span></div></div></div>${unitBisnisHTML}${subtaskHTML}<div class="divider"></div><div class="section-title">📝 Riwayat Update</div>${updatesHTML}</div>`;
+}
+function backToList(){currentDetailId=null;document.getElementById('projectDetail').style.display='none';document.getElementById('projectList').style.display='';document.getElementById('topbarActions').innerHTML=`<button class="btn-primary edit-only" onclick="openModal('addProjectModal')">＋ Input Project</button>`;renderProjects();}
+function addProject(){
+  if(!ensureDataReady())return;
+  const name=document.getElementById('f_name').value.trim(),pic=document.getElementById('f_pic').value.trim(),start=document.getElementById('f_start').value,end=document.getElementById('f_end').value;
+  const subdivisi=document.getElementById('f_subdivisi').value,unitBisnis=document.getElementById('f_unitBisnis').value;
+  if(!name||!pic||!start||!end){toast('⚠️ Lengkapi field wajib');return;}
+  if(!subdivisi||!unitBisnis){toast('⚠️ Pilih Subdivisi TSI dan Unit Bisnis');return;}
+  const picSubdivisi=Array.from(document.querySelectorAll('.f_picSubdivisi-cb:checked')).map(el=>el.value);
+  const picUnitBisnis=Array.from(document.querySelectorAll('.f_picUnitBisnis-cb:checked')).map(el=>el.value);
+  const subtasks=collectNewSubtasks();const initialProgress=subtasks.length?calcProgressFromSubtasks(subtasks)||0:0;
+  projects.push({id:Date.now(),name,pic,cat:document.getElementById('f_cat').value,status:document.getElementById('f_status').value,priority:document.getElementById('f_priority').value,start,end,budget:parseInt(document.getElementById('f_budget').value)||0,spent:0,progress:initialProgress,desc:document.getElementById('f_desc').value,subdivisi,unitBisnis,picSubdivisi,picUnitBisnis,updates:[],subtasks});
+  ['f_name','f_pic','f_budget','f_start','f_end','f_desc'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('f_subdivisi').value='';document.getElementById('f_unitBisnis').value='';
+  document.getElementById('newSubtaskList').innerHTML='';newSubtaskCounter=0;
+  closeModal('addProjectModal');toast('✅ Project berhasil ditambahkan!');renderProjects();renderDashboard();updateNavBadge();saveProjectsToFirestore();
+}
+function deleteProject(id, event){
+  if(event) event.stopPropagation();
+  if(!ensureDataReady())return;
+  const p = projects.find(p=>p.id===id);
+  if(!p) return;
+  if(!confirm(`Hapus project "${p.name}"?\n\nTindakan ini tidak bisa dibatalkan dan akan tersinkron ke semua device.`)) return;
+  projects = projects.filter(pr=>pr.id!==id);
+  if(currentDetailId===id){
+    currentDetailId=null;
+    document.getElementById('projectDetail').style.display='none';
+    document.getElementById('projectList').style.display='';
+    document.getElementById('topbarActions').innerHTML=`<button class="btn-primary edit-only" onclick="openModal('addProjectModal')">＋ Input Project</button>`;
+  }
+  renderProjects();renderDashboard();updateNavBadge();saveProjectsToFirestore();
+  toast('🗑️ Project berhasil dihapus');
+}
+function deleteAllProjects(){
+  if(!ensureDataReady())return;
+  if(projects.length===0){ toast('Tidak ada project untuk dihapus'); return; }
+  if(!confirm(`Hapus SEMUA ${projects.length} project?\n\nTindakan ini tidak bisa dibatalkan dan akan menghapus data di semua device.`)) return;
+  if(!confirm('Konfirmasi sekali lagi: yakin ingin menghapus SEMUA data project?')) return;
+  projects = [];
+  currentDetailId=null;
+  document.getElementById('projectDetail').style.display='none';
+  document.getElementById('projectList').style.display='';
+  document.getElementById('topbarActions').innerHTML=`<button class="btn-primary edit-only" onclick="openModal('addProjectModal')">＋ Input Project</button>`;
+  renderProjects();renderDashboard();updateNavBadge();saveProjectsToFirestore();
+  toast('🗑️ Semua project berhasil dihapus');
+}
+function applyUpdate(){
+  if(!ensureDataReady())return;
+  const p=projects.find(p=>p.id===currentDetailId);if(!p)return;
+  // Flush ALL subtask edits from DOM: name, milestone, status, weeks
+  saveSubtaskEditsToMemory(p);
+  // Auto-calculate progress from subtask status
+  if(p.subtasks&&p.subtasks.length){
+    const autoP=calcProgressFromSubtasks(p.subtasks);
+    if(autoP!==null)p.progress=autoP;
+  }
+  const ns=document.getElementById('u_status').value,
+        np=parseInt(document.getElementById('u_progress').value),
+        ns2=parseInt(document.getElementById('u_spent').value),
+        note=document.getElementById('u_note').value.trim(),
+        date=document.getElementById('u_date').value;
+  if(ns)p.status=ns;
+  if(!isNaN(np)&&(!p.subtasks||!p.subtasks.length))p.progress=Math.min(100,Math.max(0,np));
+  if(!isNaN(ns2))p.spent=ns2;
+  if(note)p.updates.unshift({date,status:p.status,note});
+  const newSub=document.getElementById('u_subdivisi').value,newUnit=document.getElementById('u_unitBisnis').value,newCat=document.getElementById('u_cat').value;
+  if(newSub)p.subdivisi=newSub;
+  if(newUnit)p.unitBisnis=newUnit;
+  if(newCat)p.cat=newCat;
+  p.picSubdivisi=Array.from(document.querySelectorAll('.u_picSubdivisi-cb:checked')).map(el=>el.value);
+  p.picUnitBisnis=Array.from(document.querySelectorAll('.u_picUnitBisnis-cb:checked')).map(el=>el.value);
+  closeModal('updateModal');
+  toast('✅ Status project diperbarui!');
+  renderDetail();
+  renderDashboard();
+  updateNavBadge();
+  saveProjectsToFirestore();
+  // Refresh Gantt modal if it's still open
+  const gm=document.getElementById('ganttModal');
+  if(gm.classList.contains('show'))showGantt(p.id);
+}
+function buildGanttHTML(p){
+  const pStart=new Date(p.start),pEnd=new Date(p.end);const months=[];let cur=new Date(pStart.getFullYear(),pStart.getMonth(),1);
+  while(cur<=pEnd){months.push({year:cur.getFullYear(),month:cur.getMonth()+1});cur=new Date(cur.getFullYear(),cur.getMonth()+1,1);}
+  if(!months.length)return'<p>Tidak ada data.</p>';
+  let estLabel="";
+  if(p.subtasks&&p.subtasks.length){const allWeeks=p.subtasks.flatMap(s=>s.weeks||[]);if(allWeeks.length){const first=allWeeks[0],last=allWeeks[allWeeks.length-1];estLabel=`Estimasi ${MONTH_NAMES[first.m-1].slice(0,3)} Week ${first.w}${first.m!==last.m||first.w!==last.w?' - '+MONTH_NAMES[last.m-1].slice(0,3)+' Week '+last.w:''}`;}}
+  let mhc=`<td rowspan="2" style="background:#1B3A6B;color:#fff;font-weight:700;font-size:12px;padding:7px 10px;text-align:center;width:36px">No</td><td rowspan="2" style="background:#1B3A6B;color:#fff;font-weight:700;font-size:12px;padding:7px 14px;text-align:center">Progress</td>`;
+  months.forEach(m=>{mhc+=`<td colspan="4" style="background:${MONTH_COLORS[(m.month-1)%MONTH_COLORS.length]};color:#fff;font-weight:700;font-size:12px;padding:7px 4px;text-align:center;border:1px solid #fff">${MONTH_NAMES[m.month-1]}</td>`;});
+  let whc='';months.forEach(()=>{[1,2,3,4].forEach(w=>{whc+=`<th style="background:#1B3A6B;color:#fff;font-size:11px;padding:5px 6px;font-weight:600;border:1px solid #2D4E8A;width:36px">W${w}</th>`;});});
+  let subtaskRows='';
+  if(p.subtasks&&p.subtasks.length){
+    p.subtasks.forEach((s,i)=>{
+      let cells='';
+      months.forEach(m=>{[1,2,3,4].forEach(w=>{const planned=s.weeks&&s.weeks.some(wk=>wk.m===m.month&&wk.w===w);let cls='gantt-cell-none';if(planned){if(s.status==='done')cls='gantt-cell-done';else if(s.status==='process')cls='gantt-cell-process';else if(s.status==='pending')cls='gantt-cell-pending';else cls='gantt-cell-undetermined';}cells+=`<td class="${cls}" style="border:1px solid #E2E8F0;width:36px;height:28px"></td>`;});});
+      subtaskRows+=`<tr><td style="border:1px solid #E2E8F0;font-weight:700;font-size:12px;color:#1B3A6B;background:#EFF3FA;text-align:center;padding:5px;width:36px">${i+1}</td><td style="border:1px solid #E2E8F0;padding:5px 12px;font-size:12px;color:#1E293B;text-align:left">${s.name}${s.isMilestone?` <span class="gantt-star">★</span>`:''}</td>${cells}</tr>`;
+    });
+  } else {subtaskRows=`<tr><td colspan="${2+months.length*4}" style="padding:20px;text-align:center;color:#94A3B8;font-size:13px">Belum ada subtask.</td></tr>`;}
+  const statusColors={"Planning":"#6366F1","On Track":"#5A8A3C","At Risk":"#E8A838","Delayed":"#D9534F","Completed":"#5A8A3C","On Hold":"#6B7280"};
+  const statusBgColor=statusColors[p.status]||"#5A8A3C";
+  const tw=months.length*4;const t1=Math.floor(tw/3),t2=Math.floor(tw/3),t3=tw-t1-t2;
+  const colgroup=`<colgroup><col style="width:36px"><col style="width:200px">${'<col style="width:36px">'.repeat(tw)}</colgroup>`;
+  return`<div class="gantt-container"><table class="gantt-table" style="border:2px solid #CBD5E1">${colgroup}<tr><td colspan="${2+tw}" style="background:#1B3A6B;color:#fff;font-size:14px;font-weight:700;padding:10px;text-align:center">TIMELINE YANG TERDAFTAR DALAM RKF</td></tr><tr><td colspan="${2+tw}" style="background:#fff;color:#1E293B;font-size:12px;font-weight:500;padding:7px;text-align:center">${p.name}</td></tr><tr><td colspan="${2+tw}" style="background:#fff;color:#64748B;font-size:11px;padding:4px;text-align:center">${estLabel||'—'}</td></tr><tr>${mhc}</tr><tr>${whc}</tr>${subtaskRows}<tr><td colspan="2" style="background:${statusBgColor};color:#fff;font-size:16px;font-weight:700;text-align:center;border:1px solid #4A7A30;padding:10px">Status: ${p.status.toUpperCase()}</td><td colspan="${t1}" class="gantt-legend-done" style="border:1px solid #5A8A3C;text-align:center;padding:8px;color:#fff;font-size:12px">Selesai<br><span style="font-size:10px;font-weight:400">Kegiatan Telah Dilaksanakan</span></td><td colspan="${t2}" class="gantt-legend-process" style="border:1px solid #C8942E;text-align:center;padding:8px;color:#fff;font-size:12px">Proses<br><span style="font-size:10px;font-weight:400">Kegiatan Dalam Proses</span></td><td colspan="${t3}" class="gantt-legend-pending" style="border:1px solid #C0392B;text-align:center;padding:8px;color:#fff;font-size:12px">Belum<br><span style="font-size:10px;font-weight:400">Kegiatan Belum Dilaksanakan</span></td></tr></table></div>`;
+}
+function showGantt(pid){
+  // Always re-fetch fresh data from projects array
+  const p=projects.find(p=>p.id===pid);
+  if(!p)return;
+  document.getElementById('ganttModalTitle').textContent='📊 Gantt RKF — '+p.name;
+  document.getElementById('ganttModalContent').innerHTML=buildGanttHTML(p);
+  if(!document.getElementById('ganttModal').classList.contains('show'))
+    openModal('ganttModal');
+}
+function populateReportFilterSelects(){
+  const map={rf_kategori:['kategori','Semua Kategori'],rf_subdivisi:['subdivisi','Semua Subdivisi'],rf_unitBisnis:['unitBisnis','Semua Unit Bisnis'],rf_picSubdivisi:['picSubdivisi','Semua PIC Subdivisi'],rf_picUnitBisnis:['picUnitBisnis','Semua PIC Unit Bisnis']};
+  Object.keys(map).forEach(id=>{
+    const el=document.getElementById(id);if(!el)return;
+    const [key,label]=map[id];const cur=el.value;
+    el.innerHTML=`<option value="">${label}</option>`+((masterData&&masterData[key])||[]).map(v=>`<option>${esc(v)}</option>`).join('');
+    el.value=cur;
+  });
+}
+function getFilteredReportProjects(){
+  const g=id=>{const el=document.getElementById(id);return el?el.value:'';};
+  const search=g('rf_search').toLowerCase(),fKat=g('rf_kategori'),fSt=g('rf_status'),fPri=g('rf_priority'),fSub=g('rf_subdivisi'),fUnit=g('rf_unitBisnis'),fPicSub=g('rf_picSubdivisi'),fPicUnit=g('rf_picUnitBisnis'),dFrom=g('rf_dateFrom'),dTo=g('rf_dateTo');
+  const filtered=projects.filter(p=>{
+    if(fKat&&p.cat!==fKat)return false;
+    if(fSt&&p.status!==fSt)return false;
+    if(fPri&&p.priority!==fPri)return false;
+    if(fSub&&p.subdivisi!==fSub)return false;
+    if(fUnit&&p.unitBisnis!==fUnit)return false;
+    if(fPicSub&&!(p.picSubdivisi||[]).includes(fPicSub))return false;
+    if(fPicUnit&&!(p.picUnitBisnis||[]).includes(fPicUnit))return false;
+    if(dFrom&&p.end<dFrom)return false;
+    if(dTo&&p.end>dTo)return false;
+    if(search&&!((p.name+' '+p.pic).toLowerCase().includes(search)))return false;
+    return true;
+  });
+  const cnt=document.getElementById('reportFilterCount');
+  if(cnt)cnt.textContent=filtered.length===projects.length?`${projects.length} project`:`${filtered.length} dari ${projects.length} project`;
+  return filtered;
+}
+function resetReportFilters(){
+  ['rf_search','rf_kategori','rf_status','rf_priority','rf_subdivisi','rf_unitBisnis','rf_picSubdivisi','rf_picUnitBisnis','rf_dateFrom','rf_dateTo'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  renderReport(currentReport);
+}
+function showReport(type,btn){currentReport=type;document.querySelectorAll('.report-tab').forEach(b=>b.classList.remove('active'));if(btn)btn.classList.add('active');renderReport(type);}
+function renderReport(type){
+  const el=document.getElementById('reportContent');
+  const projects=getFilteredReportProjects();
+  if(projects.length===0){
+    el.innerHTML=`<div style="background:#fff;border:1px solid #E2E8F0;border-radius:12px;padding:48px;text-align:center;color:#94A3B8"><div style="font-size:32px;margin-bottom:10px">🔍</div>Tidak ada project yang sesuai dengan filter.<br><button class="btn-outline btn-sm" style="margin-top:14px" onclick="resetReportFilters()">↺ Reset Filter</button></div>`;
+    return;
+  }
+  const total=projects.length,totalBudget=projects.reduce((s,p)=>s+p.budget,0),totalSpent=projects.reduce((s,p)=>s+p.spent,0);
+  const avgProg=Math.round(projects.reduce((s,p)=>s+p.progress,0)/total);const ac=getAlertCounts(projects);
+  if(type==='summary'){
+    const statuses=["Planning","On Track","At Risk","Delayed","Completed","On Hold"];
+    el.innerHTML=`<div style="background:#fff;border:1px solid #E2E8F0;border-radius:12px;padding:24px"><div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:22px;flex-wrap:wrap;gap:10px"><div><h2 style="margin:0;font-size:18px;font-weight:700;color:#0F172A">Executive Summary Report</h2><p style="margin:4px 0 0;color:#94A3B8;font-size:12px">Periode: ${new Date().toLocaleDateString("id-ID",{month:"long",year:"numeric"})}</p></div><span style="background:#EEF2FF;color:#4338CA;padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600">📅 ${new Date().toLocaleDateString("id-ID")}</span></div><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:12px;margin-bottom:22px">${[["🗂","Total Portfolio",total+" Projects"],["💵","Budget",fmt(totalBudget)],["💸","Realisasi",fmt(totalSpent)],["📈","Avg Completion",avgProg+"%"],["🚨","Overdue",ac.overdue+" Projects"],["✅","Completed",projects.filter(p=>p.status==="Completed").length+" Projects"]].map(([ic,lb,vl])=>`<div style="background:#F8FAFC;border-radius:10px;padding:14px;display:flex;align-items:center;gap:10px"><span style="font-size:20px">${ic}</span><div><div style="font-size:11px;color:#94A3B8;margin-bottom:2px">${lb}</div><div style="font-size:13px;font-weight:600;color:#0F172A">${vl}</div></div></div>`).join('')}</div><div class="section-title">Status Distribution</div><div class="status-dist">${statuses.map(s=>{const c=statusDistStyle(s),cnt=projects.filter(p=>p.status===s).length;return`<div style="background:${c.bg};border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:8px;flex:1;min-width:100px"><span style="width:8px;height:8px;border-radius:50%;background:${c.dot};flex-shrink:0"></span><span style="color:${c.text};font-weight:500;font-size:13px">${s}</span><span style="background:${c.dot}33;color:${c.text};padding:2px 8px;border-radius:99px;font-size:12px;font-weight:700;margin-left:auto">${cnt}</span></div>`;}).join('')}</div></div>`;
+  } else if(type==='detail'){
+    el.innerHTML=`<div class="table-card"><div class="table-header"><span class="table-title">Project Detail Report</span></div><div class="table-overflow"><table><thead><tr><th>No</th><th>Nama Project</th><th>PIC</th><th>Kategori</th><th>Subdivisi TSI</th><th>Unit Bisnis</th><th>Status</th><th>Prioritas</th><th>Deadline</th><th>Alert</th><th>Subtask</th><th>Progress</th><th>Budget</th><th>Realisasi</th><th>%</th></tr></thead><tbody>${projects.map((p,i)=>{const st=p.subtasks||[];const done=st.filter(s=>s.status==='done').length;return`<tr><td style="color:#94A3B8">${i+1}</td><td style="font-weight:500;color:#1E293B;max-width:180px">${p.name}</td><td style="color:#64748B">${p.pic}</td><td><span class="chip">${p.cat}</span></td><td style="color:#64748B;font-size:12px">${p.subdivisi||'—'}</td><td style="color:#64748B;font-size:12px">${p.unitBisnis||'—'}</td><td>${badgeHTML(p.status)}</td><td>${priBadge(p.priority)}</td><td style="white-space:nowrap;color:#64748B">${fmtDate(p.end)}</td><td>${alertBadgeHTML(p)}</td><td style="text-align:center;color:#6366F1;font-weight:500">${st.length?`${done}/${st.length}`:'—'}</td><td style="min-width:120px"><div style="display:flex;align-items:center;gap:6px">${progressBarHTML(p.progress)}<span style="font-size:11px;min-width:28px">${p.progress}%</span></div></td><td style="white-space:nowrap;font-size:12px;color:#64748B">${fmt(p.budget)}</td><td style="white-space:nowrap;font-size:12px;color:#64748B">${fmt(p.spent)}</td><td><span class="${pct(p.spent,p.budget)>90?'text-red':pct(p.spent,p.budget)>70?'text-amber':'text-green'}">${pct(p.spent,p.budget)}%</span></td></tr>`;}).join('')}</tbody></table></div></div>`;
+  } else if(type==='budget'){
+    el.innerHTML=`<div style="background:#fff;border:1px solid #E2E8F0;border-radius:12px;padding:24px"><div class="stat-grid" style="margin-bottom:22px">${[{label:"Total Budget",value:fmt(totalBudget),color:"#6366F1",icon:"💰"},{label:"Total Realisasi",value:fmt(totalSpent),color:"#EC4899",icon:"💸"},{label:"Sisa Anggaran",value:fmt(totalBudget-totalSpent),color:"#10B981",icon:"💵"},{label:"Utilization",value:pct(totalSpent,totalBudget)+"%",color:"#F59E0B",icon:"📊"}].map(c=>`<div class="stat-card"><div class="stat-icon" style="background:${c.color}18">${c.icon}</div><div class="stat-label">${c.label}</div><div class="stat-value" style="font-size:18px">${c.value}</div></div>`).join('')}</div><div class="section-title">Budget per Project</div>${projects.map(p=>{const u=pct(p.spent,p.budget);return`<div style="padding:14px 0;border-bottom:1px solid #F8FAFC"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;flex-wrap:wrap;gap:6px"><div style="display:flex;align-items:center;gap:8px"><span style="font-weight:500;font-size:13px">${p.name}</span>${badgeHTML(p.status)}</div><span class="${u>90?'text-red':u>70?'text-amber':'text-green'}">${u}% utilized</span></div>${progressBarHTML(Math.min(u,100))}<div style="display:flex;justify-content:space-between;margin-top:5px;font-size:11px;color:#94A3B8"><span>${fmt(p.spent)}</span><span>${fmt(p.budget)}</span></div></div>`;}).join('')}</div>`;
+  } else if(type==='timeline'){
+    const sorted=[...projects].sort((a,b)=>new Date(a.end)-new Date(b.end));
+    el.innerHTML=`<div style="background:#fff;border:1px solid #E2E8F0;border-radius:12px;padding:24px"><h2 style="margin:0 0 6px;font-size:15px;font-weight:600;color:#0F172A">Timeline Alert Report</h2><p style="margin:0 0 20px;font-size:12px;color:#94A3B8">Diurutkan berdasarkan deadline terdekat</p><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:22px">${[{label:"Overdue",n:ac.overdue,bg:"#FEF2F2",c:"#991B1B",ic:"🚨"},{label:"Kritis ≤7hr",n:ac.critical,bg:"#FFFBEB",c:"#92400E",ic:"⚠️"},{label:"Warning ≤14hr",n:ac.warning,bg:"#FFF7ED",c:"#C2410C",ic:"⏰"},{label:"Segera ≤30hr",n:ac.soon,bg:"#EFF6FF",c:"#1D4ED8",ic:"📅"},{label:"Selesai Awal",n:ac.early,bg:"#F0FDF4",c:"#14532D",ic:"🎉"}].map(x=>`<div style="background:${x.bg};border-radius:10px;padding:12px;text-align:center"><div style="font-size:18px">${x.ic}</div><div style="font-size:22px;font-weight:700;color:${x.c}">${x.n}</div><div style="font-size:11px;font-weight:500;color:${x.c}">${x.label}</div></div>`).join('')}</div><table style="width:100%;border-collapse:collapse"><thead><tr><th>Project</th><th>PIC</th><th>Status</th><th>Deadline</th><th>Alert</th><th>Progress</th><th>Sisa Hari</th></tr></thead><tbody>${sorted.map(p=>{const a=getAlertInfo(p);const end=new Date(p.end);end.setHours(0,0,0,0);const diff=Math.round((end-TODAY)/86400000);const diffStr=diff<0?`<span class="text-red">${Math.abs(diff)} hari lalu</span>`:diff===0?`<span class="text-red">Hari Ini!</span>`:`<span style="color:#374151">${diff} hari lagi</span>`;return`<tr><td style="font-weight:500;color:#0F172A;max-width:180px">${p.name}</td><td style="color:#64748B">${p.pic}</td><td>${badgeHTML(p.status)}</td><td style="white-space:nowrap;color:#64748B">${fmtDate(p.end)}</td><td>${alertBadgeHTML(p)}</td><td style="min-width:110px"><div style="display:flex;align-items:center;gap:6px">${progressBarHTML(p.progress)}<span style="font-size:11px">${p.progress}%</span></div></td><td>${diffStr}</td></tr>`;}).join('')}</tbody></table></div>`;
+  } else if(type==='gantt'){
+    el.innerHTML=`<div style="background:#fff;border:1px solid #E2E8F0;border-radius:12px;padding:24px"><h2 style="margin:0 0 6px;font-size:15px;font-weight:600;color:#0F172A">📊 Report Gantt RKF per Project</h2><p style="margin:0 0 18px;font-size:12px;color:#94A3B8">Pilih project untuk melihat timeline format RKF</p><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px">${projects.map(p=>{const st=p.subtasks||[];const done=st.filter(s=>s.status==='done').length;return`<div style="border:1px solid #E2E8F0;border-radius:10px;padding:14px 18px;cursor:pointer;transition:all .15s" onclick="showGantt(${p.id})" onmouseover="this.style.borderColor='#6366F1'" onmouseout="this.style.borderColor='#E2E8F0'"><div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px"><span style="font-weight:600;font-size:13px;color:#0F172A;flex:1">${p.name}</span>${badgeHTML(p.status)}</div><div style="font-size:12px;color:#64748B;margin-bottom:8px">PIC: ${p.pic} · ${fmtDate(p.start)} – ${fmtDate(p.end)}</div><div style="display:flex;align-items:center;justify-content:space-between"><span style="font-size:11px;background:#EEF2FF;color:#4338CA;padding:2px 8px;border-radius:6px">📋 ${done}/${st.length} subtask</span><span style="font-size:12px;color:#6366F1;font-weight:500">Buka Gantt →</span></div></div>`;}).join('')}</div></div>`;
+  }
+}
+document.getElementById('pageDate').textContent=new Date().toLocaleDateString("id-ID",{weekday:"long",year:"numeric",month:"long",day:"numeric"});
+</script>
+
+<!-- ===== FIREBASE: AUTH + FIRESTORE SYNC ===== -->
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyD7NUvlXLylNU_a0Bjs7DOKXrOSvRAKuHU",
+  authDomain: "pmo-tsi.firebaseapp.com",
+  projectId: "pmo-tsi",
+  storageBucket: "pmo-tsi.firebasestorage.app",
+  messagingSenderId: "639140303290",
+  appId: "1:639140303290:web:b1b0c7d29423ed6e468d83"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+const PROJECTS_DOC = db.collection('pmo').doc('projects');
+const MASTER_DOC = db.collection('pmo').doc('masterData');
+let firestoreUnsub = null;
+let masterUnsub = null;
+let isRemoteUpdate = false;
+let projectsLoaded = false;
+let masterDataLoaded = false;
+function ensureDataReady(){
+  if(!projectsLoaded || !masterDataLoaded){
+    toast('⏳ Data belum selesai dimuat dari server, tunggu 2-3 detik lalu coba lagi');
+    return false;
+  }
+  return true;
+}
+let masterData = { kategori:[], subdivisi:[], picSubdivisi:[], unitBisnis:[], picUnitBisnis:[] };
+const DEFAULT_MASTER_DATA = {
+  kategori: ["Infrastructure","Application","Security","Data & Analytics","Digital Transformation","ERP","Integration"],
+  subdivisi: ["Infrastruktur & Operasional","Aplikasi & Pengembangan","Data & Analytics","Keamanan Informasi"],
+  picSubdivisi: [],
+  unitBisnis: ["Retail Banking","Corporate Banking","Treasury","Operations"],
+  picUnitBisnis: []
+};
+
+function renderAll(){
+  populateFilterSelects();
+  populateReportFilterSelects();
+  renderDashboard();
+  if(document.getElementById('view-projects').classList.contains('active')){
+    if(currentDetailId!==null && document.getElementById('projectDetail').style.display!=='none'){
+      renderDetail();
+    } else {
+      renderProjects();
+    }
+  }
+  if(document.getElementById('view-alerts').classList.contains('active')) renderAlertView();
+  if(document.getElementById('view-report').classList.contains('active')) renderReport(currentReport);
+  updateNavBadge();
+  const gm=document.getElementById('ganttModal');
+  if(gm.classList.contains('show') && currentDetailId!==null) showGantt(currentDetailId);
+}
+
+async function saveMasterData(){
+  try{
+    await MASTER_DOC.set(masterData, {merge:true});
+  }catch(e){
+    console.error('Gagal menyimpan data master', e);
+    toast('⚠️ Gagal menyimpan data master, cek koneksi internet');
+  }
+}
+
+function startMasterDataSync(){
+  if(masterUnsub) masterUnsub();
+  masterUnsub = MASTER_DOC.onSnapshot(async (doc)=>{
+    if(!doc.exists){
+      if(isViewerMode) return;
+      await MASTER_DOC.set(DEFAULT_MASTER_DATA);
+      masterDataLoaded = true;
+      return;
+    }
+    const data = doc.data()||{};
+    masterData = {
+      kategori: data.kategori||[],
+      subdivisi: data.subdivisi||[],
+      picSubdivisi: data.picSubdivisi||[],
+      unitBisnis: data.unitBisnis||[],
+      picUnitBisnis: data.picUnitBisnis||[]
+    };
+    if(!isViewerMode && data.kategori===undefined){
+      // Migrasi otomatis: dokumen lama belum punya field kategori
+      masterData.kategori = DEFAULT_MASTER_DATA.kategori;
+      MASTER_DOC.set({kategori: masterData.kategori}, {merge:true}).catch(e=>console.error(e));
+    }
+    masterDataLoaded = true;
+    populateFilterSelects();
+    populateReportFilterSelects();
+    if(document.getElementById('addProjectModal').classList.contains('show')) populateAddProjectSelects();
+    if(document.getElementById('masterDataModal').classList.contains('show')) renderMasterDataModal();
+  }, (err)=>{
+    console.error('Master data sync error', err);
+  });
+}
+
+async function saveProjectsToFirestore(){
+  isRemoteUpdate = true;
+  try{
+    await PROJECTS_DOC.set({ list: projects, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+  }catch(e){
+    console.error('Gagal menyimpan ke Firestore', e);
+    toast('⚠️ Gagal menyimpan ke server, cek koneksi internet');
+  }
+  setTimeout(()=>{ isRemoteUpdate = false; }, 800);
+}
+
+const isViewerMode = new URLSearchParams(window.location.search).get('view')==='1';
+
+function startFirestoreSync(){
+  if(firestoreUnsub) firestoreUnsub();
+  firestoreUnsub = PROJECTS_DOC.onSnapshot(async (doc)=>{
+    if(!doc.exists){
+      if(isViewerMode) return; // viewer tidak boleh menulis, tunggu data owner
+      // Belum ada data di server -> seed dengan data awal (hanya sekali, saat pertama kali dipakai)
+      await PROJECTS_DOC.set({ list: projects, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+      projectsLoaded = true;
+      renderAll();
+      return;
+    }
+    if(isRemoteUpdate) return; // ini snapshot dari tulisan kita sendiri, sudah dirender duluan
+    const data = doc.data();
+    if(data && Array.isArray(data.list)){
+      projects = data.list;
+      projectsLoaded = true;
+      renderAll();
+    }
+  }, (err)=>{
+    console.error('Firestore sync error', err);
+    toast('⚠️ Koneksi ke database bermasalah');
+  });
+}
+
+if(isViewerMode){
+  document.body.classList.add('viewer-mode');
+  document.getElementById('loginScreen').style.display='none';
+  document.getElementById('appRoot').style.display='';
+  document.getElementById('userEmailDisplay').textContent = '👁️ Mode Viewer';
+  startFirestoreSync();
+  startMasterDataSync();
+} else {
+  auth.onAuthStateChanged(user=>{
+    if(user){
+      document.body.classList.remove('viewer-mode');
+      document.getElementById('loginScreen').style.display='none';
+      document.getElementById('appRoot').style.display='';
+      document.getElementById('userEmailDisplay').textContent = user.email;
+      startFirestoreSync();
+      startMasterDataSync();
+    } else {
+      if(firestoreUnsub){ firestoreUnsub(); firestoreUnsub=null; }
+      if(masterUnsub){ masterUnsub(); masterUnsub=null; }
+      document.getElementById('loginScreen').style.display='';
+      document.getElementById('appRoot').style.display='none';
+      document.getElementById('loginPassword').value='';
+    }
+  });
+}
+
+function copyShareLink(){
+  const link = window.location.origin + window.location.pathname + '?view=1';
+  const finish = ()=> toast('🔗 Link viewer disalin! Siapapun bisa lihat tanpa login (tidak bisa edit/hapus).');
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(link).then(finish).catch(()=>{ prompt('Copy link ini:', link); });
+  } else {
+    prompt('Copy link ini:', link);
+  }
+}
+
+function doLogin(){
+  const email=document.getElementById('loginEmail').value.trim();
+  const pass=document.getElementById('loginPassword').value;
+  const errEl=document.getElementById('loginError');
+  errEl.textContent='';
+  if(!email||!pass){ errEl.textContent='Isi email dan password.'; return; }
+  const btn=document.getElementById('loginBtn');
+  btn.disabled=true; btn.textContent='Masuk...';
+  auth.signInWithEmailAndPassword(email,pass)
+    .catch(err=>{
+      errEl.textContent = (err.code==='auth/invalid-credential'||err.code==='auth/wrong-password'||err.code==='auth/user-not-found')
+        ? 'Email atau password salah.' : 'Gagal login: '+err.message;
+    })
+    .finally(()=>{ btn.disabled=false; btn.textContent='Masuk'; });
+}
+function doLogout(){ auth.signOut(); }
+document.getElementById('loginForm').addEventListener('submit', function(e){ e.preventDefault(); doLogin(); });
+</script>
+</body>
+</html>
